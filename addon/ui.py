@@ -10,6 +10,9 @@ class NODE_MT_category_compositor_retromancer(Menu):
 
     def draw(self, _context) -> None:
         node_add_menu.add_node_type(self.layout, "CompositorNodeRetromancerQuantize")
+        node_add_menu.add_node_type(
+            self.layout, "CompositorNodeRetromancerBayerTexture"
+        )
         node_add_menu.add_node_type(self.layout, "CompositorNodeRetromancer2BitDither")
         node_add_menu.draw_assets_for_catalog(self.layout, self.bl_label)
 

@@ -4,6 +4,7 @@ from typing import Callable, List, Tuple
 
 from .addon.nodes.quantize import CompositorNodeRetromancerQuantize
 from .addon.nodes.monochrome_dither import CompositorNodeRetromancer2BitDither
+from .addon.nodes.bayer_texture import CompositorNodeRetromancerBayerTexture
 from .addon.textures import regenerate_textures
 from .addon.ui import NODE_MT_category_compositor_retromancer, update_add_menu
 
@@ -63,6 +64,7 @@ def remove_menu(menu: Menu, func: Callable) -> None:
 classes = [
     CompositorNodeRetromancerQuantize,
     CompositorNodeRetromancer2BitDither,
+    CompositorNodeRetromancerBayerTexture,
     NODE_MT_category_compositor_retromancer,
 ]
 
