@@ -19,7 +19,9 @@ class CompositorNodeRetromancerBayerTexture(
     show_preview = True
 
     def update_texture(self, context) -> None:
-        texture_node = context.node.node_tree.nodes.get("Texture")
+        """threshold_enum_prop update callback"""
+
+        texture_node = self.node_tree.nodes.get("Texture")
         texture_node.texture = bpy.data.textures.get(self.threshold_enum_prop)
 
     threshold_enum_prop: EnumProperty(  # type: ignore
@@ -29,8 +31,6 @@ class CompositorNodeRetromancerBayerTexture(
     def init(self, context) -> None:
         initialize_textures()
         self.init_group_node()
-        self.show_preview = True
-        self.show_texture = True
 
     def draw_buttons(self, context, layout) -> None:
         layout.label(text="Threshold map:")

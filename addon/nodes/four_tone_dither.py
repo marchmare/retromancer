@@ -6,8 +6,10 @@ from ..textures import initialize_textures, threshold_enum_items
 from ..palettes import palette_4tone_enum_items, Color as c
 from ..node_utils import CustomNodeGroupBuilder
 
+# defaults
 _TONES = ["hlt", "mid", "shd"]
-_CR_POS = (0.0, 1 / 3, 2 / 3, 1.0)
+_CR_POS = (0.0, 0.2153, 0.4482, 1.0)
+_PRESET = "4tone_grayscale"
 
 
 class CompositorNodeRetromancer4ToneDither(
@@ -22,20 +24,33 @@ class CompositorNodeRetromancer4ToneDither(
     bl_width_default = 210
 
     def update_texture(self, context) -> None:
+        """threshold_enum_prop update callback"""
         for tone in _TONES:
             dither_node = self.node_tree.nodes.get(f"dither_{tone}")
             dither_node.threshold_enum_prop = self.threshold_enum_prop
 
-    def update_preset(self, context) -> None:
-        pass
+    def _update_color_palette(self, preset: str) -> None:
+        """Load color values from preset into color sockets."""
+        preset_values = iter(c.from_palette(preset))
+        for i in range(1, 5):
+            self.inputs[f"Color {i}"].default_value = next(preset_values)
 
-    def _update_ramp(self, name: str, property: str):
+    def update_preset(self, context) -> None:
+        """palette_presets_enum_prop update callback"""
+        if not context.property:
+            return
+        preset = getattr(self, context.property[1])
+        self._update_color_palette(preset)
+
+    def _update_ramp(self, name: str, property: str) -> None:
+        """Update position of all color ramps' stops based on values from each tone_ramp_x_prop"""
         prop_val = getattr(self, property)
         elem_idx = int(property.split("_")[-2])
         color_ramp_node = self.node_tree.nodes.get(name)
         color_ramp_node.color_ramp.elements[elem_idx].position = prop_val
 
-    def update_tone_ramp(self, context) -> None:
+    def update_tone_ramps(self, context) -> None:
+        """tone_ramp_x_prop update callback"""
         for tone in _TONES:
             self._update_ramp(f"cr_mask_{tone}", context.property[1])
             self._update_ramp(f"cr_gradient_{tone}", context.property[1])
@@ -49,7 +64,7 @@ class CompositorNodeRetromancer4ToneDither(
 
     tone_ramp_0_prop: FloatProperty(
         subtype="FACTOR",
-        update=update_tone_ramp,
+        update=update_tone_ramps,
         name="tone_pos_0",
         min=0.0,
         max=1.0,
@@ -57,7 +72,7 @@ class CompositorNodeRetromancer4ToneDither(
     )  # type: ignore
     tone_ramp_1_prop: FloatProperty(
         subtype="FACTOR",
-        update=update_tone_ramp,
+        update=update_tone_ramps,
         name="tone_pos_1",
         min=0.0,
         max=1.0,
@@ -65,7 +80,7 @@ class CompositorNodeRetromancer4ToneDither(
     )  # type: ignore
     tone_ramp_2_prop: FloatProperty(
         subtype="FACTOR",
-        update=update_tone_ramp,
+        update=update_tone_ramps,
         name="tone_pos_3",
         min=0.0,
         max=1.0,
@@ -73,7 +88,7 @@ class CompositorNodeRetromancer4ToneDither(
     )  # type: ignore
     tone_ramp_3_prop: FloatProperty(
         subtype="FACTOR",
-        update=update_tone_ramp,
+        update=update_tone_ramps,
         name="tone_pos_3",
         min=0.0,
         max=1.0,
@@ -82,15 +97,7 @@ class CompositorNodeRetromancer4ToneDither(
 
     def init(self, context) -> None:
         initialize_textures()
-        self.add_properties()
         self.init_group_node()
-        self.set_default_interface()
-
-    def set_default_interface(self):
-        self.inputs["Color 1"].default_value = (0.0, 0.0, 0.0, 1)
-        self.inputs["Color 2"].default_value = (0.612, 0.573, 0.957, 1)
-        self.inputs["Color 3"].default_value = (0.925, 0.541, 0.549, 1)
-        self.inputs["Color 4"].default_value = (0.988, 0.98, 0.675, 1)
 
     def draw_buttons(self, context, layout) -> None:
         layout.prop(self, "threshold_enum_prop")
@@ -103,20 +110,23 @@ class CompositorNodeRetromancer4ToneDither(
         layout.row()
         layout.prop(self, "palette_presets_enum_prop")
 
+    def _configure_interface(self) -> None:
+        self.palette_presets_enum_prop = _PRESET
+        self._update_color_palette(_PRESET)
+
     def _configure_sockets(self) -> None:
         # INPUTS:
+        self.node_tree.interface.new_socket(
+            name="Image",
+            in_out="INPUT",
+            socket_type="NodeSocketColor",
+        )
         for i in range(1, 5):
             self.node_tree.interface.new_socket(
                 name=f"Color {i}",
                 in_out="INPUT",
                 socket_type="NodeSocketColor",
             )
-
-        self.node_tree.interface.new_socket(
-            name="Image",
-            in_out="INPUT",
-            socket_type="NodeSocketColor",
-        )
 
         # OUTPUTS:
         self.node_tree.interface.new_socket(

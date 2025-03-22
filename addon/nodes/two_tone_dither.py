@@ -3,8 +3,11 @@ from bpy.types import CompositorNodeCustomGroup
 from bpy.props import EnumProperty
 
 from ..textures import initialize_textures, threshold_enum_items
-from ..palettes import palette_2tone_enum_items, Color
+from ..palettes import palette_2tone_enum_items, Color as c
 from ..node_utils import CustomNodeGroupBuilder
+
+# defaults
+_PRESET = "2tone_bw"
 
 
 class CompositorNodeRetromancer2ToneDither(
@@ -19,11 +22,24 @@ class CompositorNodeRetromancer2ToneDither(
     bl_width_default = 200
 
     def update_texture(self, context) -> None:
+        """threshold_enum_prop update callback"""
+
         texture_node = self.node_tree.nodes.get("Texture")
         texture_node.texture = bpy.data.textures.get(self.threshold_enum_prop)
 
+    def _update_color_palette(self, preset: str) -> None:
+        """Load color values from preset into color sockets."""
+        preset_values = iter(c.from_palette(preset))
+        for i in range(1, 3):
+            self.inputs[f"Color {i}"].default_value = next(preset_values)
+
     def update_preset(self, context) -> None:
-        pass
+        """palette_presets_enum_prop update callback"""
+
+        if not context.property:
+            return
+        preset = getattr(self, context.property[1])
+        self._update_color_palette(preset)
 
     threshold_enum_prop: EnumProperty(  # type: ignore
         items=threshold_enum_items, name="", update=update_texture
@@ -35,33 +51,29 @@ class CompositorNodeRetromancer2ToneDither(
     def init(self, context) -> None:
         initialize_textures()
         self.init_group_node()
-        self.set_default_interface()
-
-    def set_default_interface(self):
-        self.inputs["Color 1"].default_value = Color.black
-        self.inputs["Color 2"].default_value = Color.white
 
     def draw_buttons(self, context, layout) -> None:
         layout.prop(self, "threshold_enum_prop")
         layout.prop(self, "palette_presets_enum_prop")
 
+    def _configure_interface(self) -> None:
+        self.palette_presets_enum_prop = _PRESET
+        self._update_color_palette(_PRESET)
+
     def _configure_sockets(self) -> None:
         # INPUTS:
-        self.node_tree.interface.new_socket(
-            name="Color 1",
-            in_out="INPUT",
-            socket_type="NodeSocketColor",
-        )
-        self.node_tree.interface.new_socket(
-            name="Color 2",
-            in_out="INPUT",
-            socket_type="NodeSocketColor",
-        )
         self.node_tree.interface.new_socket(
             name="Image",
             in_out="INPUT",
             socket_type="NodeSocketColor",
         )
+        for i in range(1, 3):
+            self.node_tree.interface.new_socket(
+                name=f"Color {i}",
+                in_out="INPUT",
+                socket_type="NodeSocketColor",
+            )
+
         # OUTPUTS:
         self.node_tree.interface.new_socket(
             name="Image",

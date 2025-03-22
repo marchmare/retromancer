@@ -12,7 +12,6 @@ class CustomNodeGroupBuilder:
         self.node_tree = bpy.data.node_groups.new(
             "." + self.bl_idname + "NodeTree", "CompositorNodeTree"
         )
-        print(self.node_tree)
 
         self.nodes = _Nodes(self.node_tree)
         self.nodes.add("input", "NodeGroupInput")
@@ -21,6 +20,7 @@ class CustomNodeGroupBuilder:
         self._configure_sockets()
         self._configure_nodes()
         self._configure_links()
+        self._configure_interface()
 
     def _configure_sockets(self) -> None:
         """Configure input and output sockets of the node group and their properties"""
@@ -32,6 +32,10 @@ class CustomNodeGroupBuilder:
 
     def _configure_links(self) -> None:
         """Configure links between added nodes"""
+        pass
+
+    def _configure_interface(self) -> None:
+        """Configure default state of node's interface"""
         pass
 
 
