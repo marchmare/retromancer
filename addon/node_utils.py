@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import NodeTree, Node
-from typing import Dict
+from typing import Dict, Optional
 
 
 class CustomNodeGroupBuilder:
@@ -12,6 +12,7 @@ class CustomNodeGroupBuilder:
         self.node_tree = bpy.data.node_groups.new(
             "." + self.bl_idname + "NodeTree", "CompositorNodeTree"
         )
+        print(self.node_tree)
 
         self.nodes = _Nodes(self.node_tree)
         self.nodes.add("input", "NodeGroupInput")
@@ -46,5 +47,13 @@ class _Nodes:
             return self._nodes[name]
         raise AttributeError(f"Node '{name}' not found in added nodes.")
 
-    def add(self, name: str, type: str) -> None:
-        self._nodes[name] = self._node_tree.nodes.new(type=type)
+    def get(self, name: str) -> Node | None:
+        if name in self._nodes:
+            return self._nodes[name]
+        return None
+
+    def add(self, key: str, type: str, name: Optional[str] = None) -> Node:
+        self._nodes[key] = self._node_tree.nodes.new(type=type)
+        if name:
+            self._nodes[key].name = name
+        return self._nodes[key]

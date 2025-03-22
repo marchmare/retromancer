@@ -3,7 +3,8 @@ from bpy.types import NODE_MT_compositor_node_add_all, Scene, Depsgraph, Menu
 from typing import Callable, List, Tuple
 
 from .addon.nodes.quantize import CompositorNodeRetromancerQuantize
-from .addon.nodes.monochrome_dither import CompositorNodeRetromancer2BitDither
+from .addon.nodes.two_tone_dither import CompositorNodeRetromancer2ToneDither
+from .addon.nodes.four_tone_dither import CompositorNodeRetromancer4ToneDither
 from .addon.nodes.bayer_texture import CompositorNodeRetromancerBayerTexture
 from .addon.textures import regenerate_textures
 from .addon.ui import NODE_MT_category_compositor_retromancer, update_add_menu
@@ -63,7 +64,8 @@ def remove_menu(menu: Menu, func: Callable) -> None:
 
 classes = [
     CompositorNodeRetromancerQuantize,
-    CompositorNodeRetromancer2BitDither,
+    CompositorNodeRetromancer2ToneDither,
+    CompositorNodeRetromancer4ToneDither,
     CompositorNodeRetromancerBayerTexture,
     NODE_MT_category_compositor_retromancer,
 ]
