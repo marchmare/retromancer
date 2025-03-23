@@ -14,7 +14,7 @@ class CompositorNodeRetromancer2ToneDither(
     CompositorNodeCustomGroup,
     CustomNodeGroupBuilder,
 ):
-    """Monochromatic ordered dither effect using provided threshold map texture."""
+    """Monochromatic, 1-bit palette ordered dither effect using provided threshold map texture."""
 
     bl_idname = "CompositorNodeRetromancer2ToneDither"
     bl_label = "Monochrome Ordered Dither"

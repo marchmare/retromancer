@@ -13,8 +13,12 @@ class NODE_MT_category_compositor_retromancer(Menu):
         node_add_menu.add_node_type(
             self.layout, "CompositorNodeRetromancerBayerTexture"
         )
+        self.layout.separator()
         node_add_menu.add_node_type(self.layout, "CompositorNodeRetromancer2ToneDither")
         node_add_menu.add_node_type(self.layout, "CompositorNodeRetromancer4ToneDither")
+        node_add_menu.add_node_type(
+            self.layout, "CompositorNodeRetromancer6BitRGBDither"
+        )
         node_add_menu.draw_assets_for_catalog(self.layout, self.bl_label)
 
 

@@ -6,6 +6,7 @@ from .addon.nodes.quantize import CompositorNodeRetromancerQuantize
 from .addon.nodes.two_tone_dither import CompositorNodeRetromancer2ToneDither
 from .addon.nodes.four_tone_dither import CompositorNodeRetromancer4ToneDither
 from .addon.nodes.bayer_texture import CompositorNodeRetromancerBayerTexture
+from .addon.nodes.rgb_dither import CompositorNodeRetromancer6BitRGBDither
 from .addon.textures import regenerate_textures
 from .addon.ui import NODE_MT_category_compositor_retromancer, update_add_menu
 
@@ -66,6 +67,7 @@ classes = [
     CompositorNodeRetromancerQuantize,
     CompositorNodeRetromancer2ToneDither,
     CompositorNodeRetromancer4ToneDither,
+    CompositorNodeRetromancer6BitRGBDither,
     CompositorNodeRetromancerBayerTexture,
     NODE_MT_category_compositor_retromancer,
 ]

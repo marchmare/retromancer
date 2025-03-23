@@ -1,4 +1,3 @@
-import bpy
 from bpy.types import CompositorNodeCustomGroup
 from bpy.props import EnumProperty, FloatProperty
 
@@ -8,7 +7,7 @@ from ..node_utils import CustomNodeGroupBuilder
 
 # defaults
 _TONES = ["hlt", "mid", "shd"]
-_CR_POS = (0.0, 0.2153, 0.4482, 1.0)
+_CR_POS = (0.0, 0.0615, 0.2431, 1.0)
 _PRESET = "4tone_grayscale"
 
 
@@ -16,7 +15,7 @@ class CompositorNodeRetromancer4ToneDither(
     CompositorNodeCustomGroup,
     CustomNodeGroupBuilder,
 ):
-    """Monochromatic ordered dither effect using provided threshold map texture."""
+    """4 tone (2-bit) palette ordered dither effect using provided threshold map texture."""
 
     bl_idname = "CompositorNodeRetromancer4ToneDither"
     bl_label = "4-Tone Ordered Dither"
