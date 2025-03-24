@@ -3,7 +3,7 @@ import bpy
 import numpy as np
 from typing import List
 
-DATANAME_PREF = ".retromancer_"
+_DATANAME_PREF = ".retromancer_"
 
 MAPS = {
     "bayer_2x2": [
@@ -31,7 +31,7 @@ MAPS = {
 
 
 threshold_enum_items = [
-    (f"{DATANAME_PREF}{key}", f"Bayer {key.split('_')[1]} pattern", "", i + 1)
+    (f"{_DATANAME_PREF}{key}", f"Bayer {key.split('_')[1]} pattern", "", i + 1)
     for i, key in enumerate(MAPS.keys())
 ]
 
@@ -68,15 +68,14 @@ class ResolutionState:
 @persistent
 def regenerate_textures(scene, depsgraph) -> None:
     """Regenerate all Bayer textures if the render resolution has changed."""
-    if not ResolutionState.update(scene):
+    if not ResolutionState.update(scene) or check_textures_updated(scene):
         return
-
     res_x = scene.render.resolution_x
     res_y = scene.render.resolution_y
 
     for name, map_array in MAPS.items():
         try:
-            bl_image = bpy.data.images.get(f"{DATANAME_PREF}{name}")
+            bl_image = bpy.data.images.get(f"{_DATANAME_PREF}{name}")
             bl_image.scale(res_x, res_y)
             pixel_data = generate_tiled_pixel_data(map_array, res_x, res_y)
             bl_image.pixels.foreach_set(pixel_data.ravel())
@@ -107,9 +106,9 @@ def _initialize_texture(name: str) -> bpy.types.Texture:
     Create new one if it doesn't exist.
     """
     T = bpy.data.textures
-    texture = T.get(f"{DATANAME_PREF}{name}", None)
+    texture = T.get(f"{_DATANAME_PREF}{name}", None)
     if not texture:
-        texture = T.new(f"{DATANAME_PREF}{name}", type="IMAGE")
+        texture = T.new(f"{_DATANAME_PREF}{name}", type="IMAGE")
     texture.use_fake_user = True
     return texture
 
@@ -120,9 +119,9 @@ def _initialize_image(name: str) -> bpy.types.Image:
     Create new one if it doesn't exist.
     """
     I = bpy.data.images
-    image = I.get(f"{DATANAME_PREF}{name}")
+    image = I.get(f"{_DATANAME_PREF}{name}")
     if not image:
-        image = I.new(f"{DATANAME_PREF}{name}", 0, 0)
+        image = I.new(f"{_DATANAME_PREF}{name}", 0, 0)
     image.use_fake_user = True
     return image
 
@@ -133,3 +132,11 @@ def initialize_textures() -> None:
         image = _initialize_image(treshmap)
         texture = _initialize_texture(treshmap)
         texture.image = image
+
+
+def check_textures_updated(scene) -> bool:
+    for treshmap in MAPS.keys():
+        bl_image = bpy.data.images.get(f"{_DATANAME_PREF}{treshmap}")
+        if not bl_image.size == [scene.render.resolution_x, scene.render.resolution_y]:
+            return False
+    return True
