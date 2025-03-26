@@ -68,8 +68,13 @@ class ResolutionState:
 @persistent
 def regenerate_textures(scene, depsgraph) -> None:
     """Regenerate all Bayer textures if the render resolution has changed."""
-    if not ResolutionState.update(scene) or check_textures_updated(scene):
+    if not scene.retromancer.auto_resize:
         return
+    if not ResolutionState.update(scene):
+        return
+    if check_textures_updated(scene):
+        return
+
     res_x = scene.render.resolution_x
     res_y = scene.render.resolution_y
 
@@ -137,6 +142,9 @@ def initialize_textures() -> None:
 def check_textures_updated(scene) -> bool:
     for treshmap in MAPS.keys():
         bl_image = bpy.data.images.get(f"{_DATANAME_PREF}{treshmap}")
-        if not bl_image.size == [scene.render.resolution_x, scene.render.resolution_y]:
+        if bl_image and not bl_image.size == (
+            scene.render.resolution_x,
+            scene.render.resolution_y,
+        ):
             return False
     return True

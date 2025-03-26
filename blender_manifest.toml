@@ -1,12 +1,12 @@
 schema_version = "1.0.0"
 id = "retromancer"
-version = "1.0.0"
+version = "0.0.0"
 name = "Retromancer"
-tagline = "Custom compositing nodes for retro vibes renders"
+tagline = "Custom compositing nodes and settings for retro vibes renders"
 maintainer = "Marcel Nowicki <0x414n@gmail.com>"
 type = "add-on"
 tags = ["Compositing"]
-blender_version_min = "4.2.0"
+blender_version_min = "4.3.2"
 license = [
   "SPDX:GPL-3.0-or-later",
 ]

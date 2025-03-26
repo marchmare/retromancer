@@ -1,4 +1,5 @@
-from bpy.types import Menu
+from bpy.types import Menu, Panel, PropertyGroup
+from bpy.props import BoolProperty, EnumProperty
 from bl_ui import node_add_menu
 
 
@@ -25,3 +26,67 @@ class NODE_MT_category_compositor_retromancer(Menu):
 def update_add_menu(self, context) -> None:
     """Add menu layout update function."""
     self.layout.menu("NODE_MT_category_compositor_retromancer")
+
+
+RETROMANCER_RESOLUTIONS = [
+    ("64x32", "64x32 (CHIP-8)", "", 1),
+    ("160x144", "160x140 (Gameboy/Gameboy Color)", "", 2),
+    ("192x160", "192x160 (Atari 2600)", "", 3),
+    ("240x160", "240x160 (Gameboy Advance)", "", 4),
+    ("256x192", "256x192 (Nintendo DS)", "", 5),
+    ("256x224", "256x224 (SNES/NES NTSC)", "", 6),
+    ("256x240", "256x240 (NES PAL)", "", 7),
+    ("320x200", "320x200 (DOS)", "", 8),
+    ("320x224", "320x224 (Sega Genesis/Neo Geo)", "", 9),
+    ("400x240", "400x240 (3DS)", "", 10),
+    ("640x480", "640x480 (Playstation 1)", "", 11),
+]
+
+
+class RetromancerPropertyGroup(PropertyGroup):
+    """Retromancer UI properties"""
+
+    selected_resolution: EnumProperty(  # type: ignore
+        name="Resolution presets",
+        items=RETROMANCER_RESOLUTIONS,
+        options=set(),
+    )
+    auto_resize: BoolProperty(  # type: ignore
+        name="Auto-resize Retromancer textures",
+        description="Enable resizing Retromancer's internal threshold map textures to current render resolution in the background.",
+        default=True,
+        options=set(),
+    )
+
+
+class UIRetromancerPanel(Panel):
+    """Retromancer control panel"""
+
+    bl_label = "Retromancer"
+    bl_idname = "RENDER_PT_retromancer_panel"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "render"
+
+    def draw(self, context) -> None:
+        layout = self.layout
+        scene = context.scene
+
+        layout.use_property_split = True
+        layout.prop(
+            scene.retromancer,
+            "selected_resolution",
+            text="Resolution presets:",
+        )
+        layout.operator("scene.retromancer_apply_resolution")
+        layout.separator()
+        layout.operator(
+            "scene.retromancer_make_camera_isometric", icon="CON_CAMERASOLVER"
+        )
+        layout.operator("scene.disable_anti_aliasing", icon="MOD_SMOOTH")
+        layout.separator()
+        layout.prop(
+            scene.retromancer,
+            "auto_resize",
+            text="Auto-resize Retromancer textures",
+        )

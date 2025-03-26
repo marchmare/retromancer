@@ -1,5 +1,6 @@
 from bpy.app.handlers import depsgraph_update_post
 from bpy.types import NODE_MT_compositor_node_add_all, Scene, Depsgraph, Menu
+from bpy.props import PointerProperty
 from typing import Callable, List, Tuple
 
 from .addon.nodes.quantize import CompositorNodeRetromancerQuantize
@@ -8,15 +9,25 @@ from .addon.nodes.four_tone_dither import CompositorNodeRetromancer4ToneDither
 from .addon.nodes.bayer_texture import CompositorNodeRetromancerBayerTexture
 from .addon.nodes.rgb_dither import CompositorNodeRetromancer6BitRGBDither
 from .addon.textures import regenerate_textures
-from .addon.ui import NODE_MT_category_compositor_retromancer, update_add_menu
+from .addon.ui import (
+    NODE_MT_category_compositor_retromancer,
+    RetromancerPropertyGroup,
+    UIRetromancerPanel,
+    update_add_menu,
+)
+from .addon.operators import (
+    ApplyRetromancerResolutionOperator,
+    MakeCameraIsometricOperator,
+    DisableAntiAliasingOperator,
+)
 
 bl_info = {
     "name": "Retromancer",
     "author": "Marcel Nowicki <0x414n@gmail.com>",
-    "version": (1, 0),
-    "blender": (4, 2, 0),
-    "location": "Compositor",
-    "description": "Retromancer addon",
+    "version": (0, 0),
+    "blender": (4, 3, 2),
+    "location": "Compositing > Add; Render Properties panel",
+    "description": "Custom compositing nodes and settings shortcuts for retro vibes renders",
     "warning": "",
     "category": "Render",
 }
@@ -70,6 +81,11 @@ classes = [
     CompositorNodeRetromancer6BitRGBDither,
     CompositorNodeRetromancerBayerTexture,
     NODE_MT_category_compositor_retromancer,
+    RetromancerPropertyGroup,
+    ApplyRetromancerResolutionOperator,
+    MakeCameraIsometricOperator,
+    DisableAntiAliasingOperator,
+    UIRetromancerPanel,
 ]
 
 
@@ -86,6 +102,8 @@ def register() -> None:
     add_menu(NODE_MT_compositor_node_add_all, update_add_menu)
     add_handler(depsgraph_update_post, regenerate_textures)
 
+    Scene.retromancer = PointerProperty(type=RetromancerPropertyGroup)
+
 
 def unregister() -> None:
     from bpy.utils import unregister_class
@@ -95,6 +113,8 @@ def unregister() -> None:
 
     for cls in classes:
         unregister_class(cls)
+
+    del Scene.retromancer
 
 
 if __name__ == "__main__":
