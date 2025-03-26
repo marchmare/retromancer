@@ -70,8 +70,6 @@ def regenerate_textures(scene, depsgraph) -> None:
     """Regenerate all Bayer textures if the render resolution has changed."""
     if not scene.retromancer.auto_resize:
         return
-    if not ResolutionState.update(scene):
-        return
     if check_textures_updated(scene):
         return
 
@@ -133,6 +131,7 @@ def _initialize_image(name: str) -> bpy.types.Image:
 
 def initialize_textures() -> None:
     """Prepare tied Image and Texture data-blocks for each Bayer matrix."""
+    print("Initialize textures")
     for treshmap in MAPS.keys():
         image = _initialize_image(treshmap)
         texture = _initialize_texture(treshmap)
@@ -142,9 +141,9 @@ def initialize_textures() -> None:
 def check_textures_updated(scene) -> bool:
     for treshmap in MAPS.keys():
         bl_image = bpy.data.images.get(f"{_DATANAME_PREF}{treshmap}")
-        if bl_image and not bl_image.size == (
+        if bl_image and not bl_image.size == [
             scene.render.resolution_x,
             scene.render.resolution_y,
-        ):
-            return False
-    return True
+        ]:
+            return True
+    return False
