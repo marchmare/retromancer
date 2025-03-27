@@ -184,6 +184,9 @@ class CompositorNodeRetromancer4ToneDither(
             nodes.add(f"add{i}", type="CompositorNodeMixRGB")
             nodes.get(f"add{i}").blend_type = "ADD"
 
+        nodes.add("alpha", type="CompositorNodeSetAlpha")
+        nodes.add("sep_color", type="CompositorNodeSeparateColor")
+
     def _configure_links(self) -> None:
         nodes = self.nodes
         links = self.node_tree.links
@@ -204,7 +207,10 @@ class CompositorNodeRetromancer4ToneDither(
         links.new(nodes.multiply_shd.outputs[0], nodes.add0.inputs[2])
         links.new(nodes.multiply_hlt.outputs[0], nodes.add1.inputs[1])
         links.new(nodes.add0.outputs[0], nodes.add1.inputs[2])
-        links.new(nodes.add1.outputs[0], nodes.output.inputs["Image"])
+        links.new(nodes.add1.outputs[0], nodes.alpha.inputs["Image"])
+        links.new(nodes.input.outputs["Image"], nodes.sep_color.inputs["Image"])
+        links.new(nodes.sep_color.outputs[3], nodes.alpha.inputs["Alpha"])
+        links.new(nodes.alpha.outputs["Image"], nodes.output.inputs["Image"])
 
         links.new(nodes.input.outputs["Color 1"], nodes.dither_shd.inputs["Color 2"])
         links.new(nodes.input.outputs["Color 2"], nodes.dither_shd.inputs["Color 1"])

@@ -86,7 +86,7 @@ class CompositorNodeRetromancer2ToneDither(
         nodes.add("sep_color", type="CompositorNodeSeparateColor")
         nodes.add("greater_than", type="CompositorNodeMath")
         nodes.add("mix", type="CompositorNodeMixRGB")
-        nodes.add("transform", type="CompositorNodeTransform")
+        nodes.add("alpha", type="CompositorNodeSetAlpha")
         nodes.add("texture", type="CompositorNodeTexture")
 
         nodes.sep_color.mode = "HSV"
@@ -102,5 +102,6 @@ class CompositorNodeRetromancer2ToneDither(
         links.new(nodes.texture.outputs["Color"], nodes.greater_than.inputs[1])
         links.new(nodes.sep_color.outputs[2], nodes.greater_than.inputs[0])
         links.new(nodes.greater_than.outputs["Value"], nodes.mix.inputs[0])
-        links.new(nodes.mix.outputs["Image"], nodes.transform.inputs["Image"])
-        links.new(nodes.transform.outputs["Image"], nodes.output.inputs["Image"])
+        links.new(nodes.mix.outputs["Image"], nodes.alpha.inputs["Image"])
+        links.new(nodes.sep_color.outputs[3], nodes.alpha.inputs["Alpha"])
+        links.new(nodes.alpha.outputs["Image"], nodes.output.inputs["Image"])

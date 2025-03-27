@@ -131,7 +131,6 @@ def _initialize_image(name: str) -> bpy.types.Image:
 
 def initialize_textures() -> None:
     """Prepare tied Image and Texture data-blocks for each Bayer matrix."""
-    print("Initialize textures")
     for treshmap in MAPS.keys():
         image = _initialize_image(treshmap)
         texture = _initialize_texture(treshmap)
