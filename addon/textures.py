@@ -140,7 +140,7 @@ def initialize_textures() -> None:
 def check_textures_updated(scene) -> bool:
     for treshmap in MAPS.keys():
         bl_image = bpy.data.images.get(f"{_DATANAME_PREF}{treshmap}")
-        if bl_image and not bl_image.size == [
+        if bl_image and bl_image.size == [
             scene.render.resolution_x,
             scene.render.resolution_y,
         ]:
