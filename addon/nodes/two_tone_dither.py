@@ -85,6 +85,7 @@ class CompositorNodeRetromancer2ToneDither(
         nodes = self.nodes
         nodes.add("sep_color", type="CompositorNodeSeparateColor")
         nodes.add("greater_than", type="CompositorNodeMath")
+        nodes.add("greater_than_alpha", type="CompositorNodeMath")
         nodes.add("mix", type="CompositorNodeMixRGB")
         nodes.add("alpha", type="CompositorNodeSetAlpha")
         nodes.add("texture", type="CompositorNodeTexture")
@@ -92,6 +93,7 @@ class CompositorNodeRetromancer2ToneDither(
         nodes.sep_color.mode = "HSV"
         nodes.texture.texture = bpy.data.textures.get(self.threshold_enum_prop)
         nodes.greater_than.operation = "GREATER_THAN"
+        nodes.greater_than_alpha.operation = "GREATER_THAN"
 
     def _configure_links(self) -> None:
         nodes = self.nodes
@@ -100,8 +102,12 @@ class CompositorNodeRetromancer2ToneDither(
         links.new(nodes.input.outputs["Color 1"], nodes.mix.inputs[1])
         links.new(nodes.input.outputs["Color 2"], nodes.mix.inputs[2])
         links.new(nodes.texture.outputs["Color"], nodes.greater_than.inputs[1])
+        links.new(nodes.texture.outputs["Color"], nodes.greater_than_alpha.inputs[1])
         links.new(nodes.sep_color.outputs[2], nodes.greater_than.inputs[0])
+        links.new(nodes.sep_color.outputs[3], nodes.greater_than_alpha.inputs[0])
         links.new(nodes.greater_than.outputs["Value"], nodes.mix.inputs[0])
+        links.new(
+            nodes.greater_than_alpha.outputs["Value"], nodes.alpha.inputs["Alpha"]
+        )
         links.new(nodes.mix.outputs["Image"], nodes.alpha.inputs["Image"])
-        links.new(nodes.sep_color.outputs[3], nodes.alpha.inputs["Alpha"])
         links.new(nodes.alpha.outputs["Image"], nodes.output.inputs["Image"])

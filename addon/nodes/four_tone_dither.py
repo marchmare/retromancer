@@ -24,7 +24,7 @@ class CompositorNodeRetromancer4ToneDither(
 
     def update_texture(self, context) -> None:
         """threshold_enum_prop update callback"""
-        for tone in _TONES:
+        for tone in _TONES + ["alpha"]:
             dither_node = self.node_tree.nodes.get(f"dither_{tone}")
             dither_node.threshold_enum_prop = self.threshold_enum_prop
 
@@ -185,6 +185,11 @@ class CompositorNodeRetromancer4ToneDither(
             nodes.get(f"add{i}").blend_type = "ADD"
 
         nodes.add("alpha", type="CompositorNodeSetAlpha")
+        nodes.add(
+            "dither_alpha",
+            type="CompositorNodeRetromancer2ToneDither",
+            name="dither_alpha",
+        )
         nodes.add("sep_color", type="CompositorNodeSeparateColor")
 
     def _configure_links(self) -> None:
@@ -209,7 +214,8 @@ class CompositorNodeRetromancer4ToneDither(
         links.new(nodes.add0.outputs[0], nodes.add1.inputs[2])
         links.new(nodes.add1.outputs[0], nodes.alpha.inputs["Image"])
         links.new(nodes.input.outputs["Image"], nodes.sep_color.inputs["Image"])
-        links.new(nodes.sep_color.outputs[3], nodes.alpha.inputs["Alpha"])
+        links.new(nodes.sep_color.outputs[3], nodes.dither_alpha.inputs["Image"])
+        links.new(nodes.dither_alpha.outputs["Image"], nodes.alpha.inputs["Alpha"])
         links.new(nodes.alpha.outputs["Image"], nodes.output.inputs["Image"])
 
         links.new(nodes.input.outputs["Color 1"], nodes.dither_shd.inputs["Color 2"])

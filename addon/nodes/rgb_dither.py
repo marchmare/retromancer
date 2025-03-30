@@ -22,7 +22,7 @@ class CompositorNodeRetromancer6BitRGBDither(
 
     def update_texture(self, context) -> None:
         """threshold_enum_prop update callback"""
-        for c in _RGB:
+        for c in _RGB + ["a"]:
             dither_node = self.node_tree.nodes.get(f"dither_{c}")
             dither_node.threshold_enum_prop = self.threshold_enum_prop
 
@@ -104,6 +104,8 @@ class CompositorNodeRetromancer6BitRGBDither(
         nodes.add("dither_r", "CompositorNodeRetromancer4ToneDither", f"dither_r")
         nodes.add("dither_g", "CompositorNodeRetromancer4ToneDither", f"dither_g")
         nodes.add("dither_b", "CompositorNodeRetromancer4ToneDither", f"dither_b")
+        nodes.add("dither_a", "CompositorNodeRetromancer2ToneDither", f"dither_a")
+        nodes.add("alpha", "CompositorNodeSetAlpha")
         nodes.add("separate", "CompositorNodeSeparateColor")
         nodes.add("combine", "CompositorNodeCombineColor")
 
@@ -115,8 +117,11 @@ class CompositorNodeRetromancer6BitRGBDither(
         links.new(nodes.separate.outputs["Red"], nodes.dither_r.inputs["Image"])
         links.new(nodes.separate.outputs["Green"], nodes.dither_g.inputs["Image"])
         links.new(nodes.separate.outputs["Blue"], nodes.dither_b.inputs["Image"])
-        links.new(nodes.separate.outputs["Alpha"], nodes.combine.inputs["Alpha"])
+        links.new(nodes.separate.outputs["Alpha"], nodes.dither_a.inputs["Image"])
+
         links.new(nodes.dither_r.outputs["Image"], nodes.combine.inputs["Red"])
         links.new(nodes.dither_g.outputs["Image"], nodes.combine.inputs["Green"])
         links.new(nodes.dither_b.outputs["Image"], nodes.combine.inputs["Blue"])
-        links.new(nodes.combine.outputs["Image"], nodes.output.inputs["Image"])
+        links.new(nodes.dither_a.outputs["Image"], nodes.alpha.inputs["Alpha"])
+        links.new(nodes.combine.outputs["Image"], nodes.alpha.inputs["Image"])
+        links.new(nodes.alpha.outputs["Image"], nodes.output.inputs["Image"])
