@@ -108,6 +108,9 @@ class CompositorNodeRetromancer6BitRGBDither(
         nodes.add("alpha", "CompositorNodeSetAlpha")
         nodes.add("separate", "CompositorNodeSeparateColor")
         nodes.add("combine", "CompositorNodeCombineColor")
+        nodes.add("posterize", type="CompositorNodePosterize")
+
+        nodes.posterize.inputs["Steps"].default_value = 32
 
     def _configure_links(self) -> None:
         nodes = self.nodes
@@ -117,7 +120,8 @@ class CompositorNodeRetromancer6BitRGBDither(
         links.new(nodes.separate.outputs["Red"], nodes.dither_r.inputs["Image"])
         links.new(nodes.separate.outputs["Green"], nodes.dither_g.inputs["Image"])
         links.new(nodes.separate.outputs["Blue"], nodes.dither_b.inputs["Image"])
-        links.new(nodes.separate.outputs["Alpha"], nodes.dither_a.inputs["Image"])
+        links.new(nodes.separate.outputs["Alpha"], nodes.posterize.inputs["Image"])
+        links.new(nodes.posterize.outputs["Image"], nodes.dither_a.inputs["Image"])
 
         links.new(nodes.dither_r.outputs["Image"], nodes.combine.inputs["Red"])
         links.new(nodes.dither_g.outputs["Image"], nodes.combine.inputs["Green"])

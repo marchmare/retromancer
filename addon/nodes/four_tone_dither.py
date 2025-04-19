@@ -191,6 +191,8 @@ class CompositorNodeRetromancer4ToneDither(
             name="dither_alpha",
         )
         nodes.add("sep_color", type="CompositorNodeSeparateColor")
+        nodes.add("posterize", type="CompositorNodePosterize")
+        nodes.posterize.inputs["Steps"].default_value = 32
 
     def _configure_links(self) -> None:
         nodes = self.nodes
@@ -214,7 +216,8 @@ class CompositorNodeRetromancer4ToneDither(
         links.new(nodes.add0.outputs[0], nodes.add1.inputs[2])
         links.new(nodes.add1.outputs[0], nodes.alpha.inputs["Image"])
         links.new(nodes.input.outputs["Image"], nodes.sep_color.inputs["Image"])
-        links.new(nodes.sep_color.outputs[3], nodes.dither_alpha.inputs["Image"])
+        links.new(nodes.sep_color.outputs[3], nodes.posterize.inputs["Image"])
+        links.new(nodes.posterize.outputs["Image"], nodes.dither_alpha.inputs["Image"])
         links.new(nodes.dither_alpha.outputs["Image"], nodes.alpha.inputs["Alpha"])
         links.new(nodes.alpha.outputs["Image"], nodes.output.inputs["Image"])
 

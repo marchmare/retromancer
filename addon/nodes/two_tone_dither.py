@@ -89,11 +89,15 @@ class CompositorNodeRetromancer2ToneDither(
         nodes.add("mix", type="CompositorNodeMixRGB")
         nodes.add("alpha", type="CompositorNodeSetAlpha")
         nodes.add("texture", type="CompositorNodeTexture")
+        nodes.add("posterize", type="CompositorNodePosterize")
 
         nodes.sep_color.mode = "HSV"
         nodes.texture.texture = bpy.data.textures.get(self.threshold_enum_prop)
         nodes.greater_than.operation = "GREATER_THAN"
         nodes.greater_than_alpha.operation = "GREATER_THAN"
+
+        # TODO: verify if it does help with anything, adjust value, add links
+        nodes.posterize.inputs["Steps"].default_value = 32
 
     def _configure_links(self) -> None:
         nodes = self.nodes
