@@ -73,6 +73,16 @@ class CompositorNodeRetromancer2ToneDither(
                 in_out="INPUT",
                 socket_type="NodeSocketColor",
             )
+        self.node_tree.interface.new_socket(
+            name="Brightness",
+            in_out="INPUT",
+            socket_type="NodeSocketFloat",
+        )
+        self.node_tree.interface.new_socket(
+            name="Contrast",
+            in_out="INPUT",
+            socket_type="NodeSocketFloat",
+        )
 
         # OUTPUTS:
         self.node_tree.interface.new_socket(
@@ -90,6 +100,7 @@ class CompositorNodeRetromancer2ToneDither(
         nodes.add("alpha", type="CompositorNodeSetAlpha")
         nodes.add("texture", type="CompositorNodeTexture")
         nodes.add("posterize", type="CompositorNodePosterize")
+        nodes.add("brightness", type="CompositorNodeBrightContrast")
 
         nodes.sep_color.mode = "HSV"
         nodes.texture.texture = bpy.data.textures.get(self.threshold_enum_prop)
@@ -102,7 +113,10 @@ class CompositorNodeRetromancer2ToneDither(
     def _configure_links(self) -> None:
         nodes = self.nodes
         links = self.node_tree.links
-        links.new(nodes.input.outputs["Image"], nodes.sep_color.inputs["Image"])
+        links.new(nodes.input.outputs["Image"], nodes.brightness.inputs["Image"])
+        links.new(nodes.input.outputs["Brightness"], nodes.brightness.inputs[1])
+        links.new(nodes.input.outputs["Contrast"], nodes.brightness.inputs[2])
+        links.new(nodes.brightness.outputs["Image"], nodes.sep_color.inputs["Image"])
         links.new(nodes.input.outputs["Color 1"], nodes.mix.inputs[1])
         links.new(nodes.input.outputs["Color 2"], nodes.mix.inputs[2])
         links.new(nodes.texture.outputs["Color"], nodes.greater_than.inputs[1])

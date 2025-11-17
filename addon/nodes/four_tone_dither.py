@@ -126,6 +126,16 @@ class CompositorNodeRetromancer4ToneDither(
                 in_out="INPUT",
                 socket_type="NodeSocketColor",
             )
+        self.node_tree.interface.new_socket(
+            name="Brightness",
+            in_out="INPUT",
+            socket_type="NodeSocketFloat",
+        )
+        self.node_tree.interface.new_socket(
+            name="Contrast",
+            in_out="INPUT",
+            socket_type="NodeSocketFloat",
+        )
 
         # OUTPUTS:
         self.node_tree.interface.new_socket(
@@ -157,6 +167,7 @@ class CompositorNodeRetromancer4ToneDither(
                 type="CompositorNodeRetromancer2ToneDither",
                 name=f"dither_{tone}",
             )
+            nodes.add("brightness", type="CompositorNodeBrightContrast")
 
             mask.color_ramp.interpolation = "CONSTANT"
             [mask.color_ramp.elements.new(0) for _ in range(2)]
@@ -198,14 +209,18 @@ class CompositorNodeRetromancer4ToneDither(
         nodes = self.nodes
         links = self.node_tree.links
 
+        links.new(nodes.input.outputs["Image"], nodes.brightness.inputs["Image"])
+        links.new(nodes.input.outputs["Brightness"], nodes.brightness.inputs[1])
+        links.new(nodes.input.outputs["Contrast"], nodes.brightness.inputs[2])
+
         for tone in _TONES:
             cr_mask = nodes.get(f"cr_mask_{tone}")
             cr_gradient = nodes.get(f"cr_gradient_{tone}")
             multiply = nodes.get(f"multiply_{tone}")
             dither = nodes.get(f"dither_{tone}")
 
-            links.new(nodes.input.outputs["Image"], cr_mask.inputs["Fac"])
-            links.new(nodes.input.outputs["Image"], cr_gradient.inputs["Fac"])
+            links.new(nodes.brightness.outputs["Image"], cr_mask.inputs["Fac"])
+            links.new(nodes.brightness.outputs["Image"], cr_gradient.inputs["Fac"])
             links.new(cr_mask.outputs["Image"], multiply.inputs[1])
             links.new(cr_gradient.outputs["Image"], dither.inputs["Image"])
             links.new(dither.outputs["Image"], multiply.inputs[2])
@@ -215,7 +230,7 @@ class CompositorNodeRetromancer4ToneDither(
         links.new(nodes.multiply_hlt.outputs[0], nodes.add1.inputs[1])
         links.new(nodes.add0.outputs[0], nodes.add1.inputs[2])
         links.new(nodes.add1.outputs[0], nodes.alpha.inputs["Image"])
-        links.new(nodes.input.outputs["Image"], nodes.sep_color.inputs["Image"])
+        links.new(nodes.brightness.outputs["Image"], nodes.sep_color.inputs["Image"])
         links.new(nodes.sep_color.outputs[3], nodes.posterize.inputs["Image"])
         links.new(nodes.posterize.outputs["Image"], nodes.dither_alpha.inputs["Image"])
         links.new(nodes.dither_alpha.outputs["Image"], nodes.alpha.inputs["Alpha"])
