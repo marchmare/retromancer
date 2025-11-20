@@ -16,7 +16,7 @@ class CompositorNodeRetromancerQuantize(
     def init(self, context) -> None:
         self.init_group_node()
 
-    def _conigure_interface(self) -> None:
+    def _configure_interface(self) -> None:
         self.inputs[1].default_value = 64.0
 
     def _configure_sockets(self) -> None:
