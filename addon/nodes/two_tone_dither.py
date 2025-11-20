@@ -38,7 +38,7 @@ class CompositorNodeRetromancer2ToneDither(
 
         if not context.property:
             return
-        preset = getattr(self, context.property[1])
+        preset = getattr(self, context.property[1].split(".")[-1])
         self._update_color_palette(preset)
 
     threshold_enum_prop: EnumProperty(  # type: ignore
