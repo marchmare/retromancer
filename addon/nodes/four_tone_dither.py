@@ -167,7 +167,6 @@ class CompositorNodeRetromancer4ToneDither(
                 type="CompositorNodeRetromancer2ToneDither",
                 name=f"dither_{tone}",
             )
-            nodes.add("brightness", type="CompositorNodeBrightContrast")
 
             mask.color_ramp.interpolation = "CONSTANT"
             [mask.color_ramp.elements.new(0) for _ in range(2)]
@@ -202,6 +201,7 @@ class CompositorNodeRetromancer4ToneDither(
             name="dither_alpha",
         )
         nodes.add("sep_color", type="CompositorNodeSeparateColor")
+        nodes.add("brightness", type="CompositorNodeBrightContrast")
         nodes.add("posterize", type="CompositorNodePosterize")
         nodes.posterize.inputs["Steps"].default_value = 32
 

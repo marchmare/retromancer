@@ -25,6 +25,7 @@ class NODE_MT_category_compositor_retromancer(Menu):
 
 def update_add_menu(self, context) -> None:
     """Add menu layout update function."""
+    self.layout.separator()
     self.layout.menu("NODE_MT_category_compositor_retromancer")
 
 

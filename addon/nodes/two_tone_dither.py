@@ -99,7 +99,6 @@ class CompositorNodeRetromancer2ToneDither(
         nodes.add("mix", type="CompositorNodeMixRGB")
         nodes.add("alpha", type="CompositorNodeSetAlpha")
         nodes.add("texture", type="CompositorNodeTexture")
-        nodes.add("posterize", type="CompositorNodePosterize")
         nodes.add("brightness", type="CompositorNodeBrightContrast")
 
         nodes.sep_color.mode = "HSV"
@@ -108,7 +107,8 @@ class CompositorNodeRetromancer2ToneDither(
         nodes.greater_than_alpha.operation = "GREATER_THAN"
 
         # TODO: verify if it does help with anything, adjust value, add links
-        nodes.posterize.inputs["Steps"].default_value = 32
+        # nodes.add("posterize", type="CompositorNodePosterize")
+        # nodes.posterize.inputs["Steps"].default_value = 32
 
     def _configure_links(self) -> None:
         nodes = self.nodes
