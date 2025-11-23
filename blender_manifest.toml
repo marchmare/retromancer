@@ -6,9 +6,7 @@ tagline = "Custom compositing nodes and settings for retro vibes renders"
 maintainer = "Marcel Nowicki <0x414n@gmail.com>"
 type = "add-on"
 tags = ["Compositing"]
-blender_version_min = "4.3.2"
+blender_version_min = "4.2.0"
 license = [
   "SPDX:GPL-3.0-or-later",
 ]
-platforms = ["linux-x64"] # Other supported platforms: "windows-arm64", "macos-x64"
-
