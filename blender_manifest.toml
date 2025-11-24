@@ -1,6 +1,6 @@
 schema_version = "1.0.0"
 id = "retromancer"
-version = "0.0.0"
+version = "1.0.0"
 name = "Retromancer"
 tagline = "Custom compositing nodes and settings for retro vibes renders"
 maintainer = "Marcel Nowicki <0x414n@gmail.com>"
@@ -10,3 +10,4 @@ blender_version_min = "4.2.0"
 license = [
   "SPDX:GPL-3.0-or-later",
 ]
+
