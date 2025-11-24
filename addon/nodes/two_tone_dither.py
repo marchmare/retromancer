@@ -5,6 +5,7 @@ from bpy.props import EnumProperty
 from ..textures import initialize_textures, threshold_enum_items
 from ..palettes import palette_2tone_enum_items, Color as c
 from ..node_utils import CustomNodeGroupBuilder
+from ..compatibilty import get_math_node_type
 
 # defaults
 _PRESET = "2tone_bw"
@@ -94,8 +95,8 @@ class CompositorNodeRetromancer2ToneDither(
     def _configure_nodes(self) -> None:
         nodes = self.nodes
         nodes.add("sep_color", type="CompositorNodeSeparateColor")
-        nodes.add("greater_than", type="CompositorNodeMath")
-        nodes.add("greater_than_alpha", type="CompositorNodeMath")
+        nodes.add("greater_than", type=get_math_node_type())
+        nodes.add("greater_than_alpha", type=get_math_node_type())
         nodes.add("mix", type="CompositorNodeMixRGB")
         nodes.add("alpha", type="CompositorNodeSetAlpha")
         nodes.add("texture", type="CompositorNodeTexture")

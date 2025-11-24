@@ -1,6 +1,7 @@
 from bpy.types import CompositorNodeCustomGroup
 
 from ..node_utils import CustomNodeGroupBuilder
+from ..compatibilty import get_math_node_type
 
 
 class CompositorNodeRetromancerQuantize(
@@ -42,9 +43,9 @@ class CompositorNodeRetromancerQuantize(
 
     def _configure_nodes(self) -> None:
         nodes = self.nodes
-        nodes.add("multiply", type="CompositorNodeMath")
-        nodes.add("floor", type="CompositorNodeMath")
-        nodes.add("divide", type="CompositorNodeMath")
+        nodes.add("multiply", type=get_math_node_type())
+        nodes.add("floor", type=get_math_node_type())
+        nodes.add("divide", type=get_math_node_type())
 
         nodes.multiply.operation = "MULTIPLY"
         nodes.floor.operation = "FLOOR"
