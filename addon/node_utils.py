@@ -1,6 +1,8 @@
 import bpy
+import traceback
 from bpy.types import NodeTree, Node
 from typing import Dict, Optional
+from .ui import draw_popup
 
 
 class CustomNodeGroupBuilder:
@@ -9,18 +11,22 @@ class CustomNodeGroupBuilder:
     def init_group_node(self) -> None:
         """Initialize group node with node tree and input and output sockets."""
 
-        self.node_tree = bpy.data.node_groups.new(
-            "." + self.bl_idname + "NodeTree", "CompositorNodeTree"
-        )
+        try:
+            self.node_tree = bpy.data.node_groups.new(
+                "." + self.bl_idname + "NodeTree", "CompositorNodeTree"
+            )
+            self.nodes = _Nodes(self.node_tree)
+            self.nodes.add("input", "NodeGroupInput")
+            self.nodes.add("output", "NodeGroupOutput")
 
-        self.nodes = _Nodes(self.node_tree)
-        self.nodes.add("input", "NodeGroupInput")
-        self.nodes.add("output", "NodeGroupOutput")
+            self._configure_sockets()
+            self._configure_nodes()
+            self._configure_links()
+            self._configure_interface()
 
-        self._configure_sockets()
-        self._configure_nodes()
-        self._configure_links()
-        self._configure_interface()
+        except RuntimeError:
+            draw_popup(text=traceback.format_exc(), icon="ERROR")
+            traceback.print_exc()
 
     def _configure_sockets(self) -> None:
         """Configure input and output sockets of the node group and their properties"""
@@ -37,6 +43,14 @@ class CustomNodeGroupBuilder:
     def _configure_interface(self) -> None:
         """Configure default state of node's interface"""
         pass
+
+    @staticmethod
+    def parse_datapath(property: str) -> str:
+        """
+        Parse datapath from a datapath string to extract the identifier of the struct.
+        To be used with string from context.property.
+        """
+        return property.split(".")[-1]
 
 
 class _Nodes:

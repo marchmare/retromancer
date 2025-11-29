@@ -1,6 +1,8 @@
 from bpy.types import Menu, Panel, PropertyGroup
 from bpy.props import BoolProperty, EnumProperty
 from bl_ui import node_add_menu
+from typing import Literal
+import bpy
 
 
 class NODE_MT_category_compositor_retromancer(Menu):
@@ -84,10 +86,24 @@ class UIRetromancerPanel(Panel):
         layout.operator(
             "scene.retromancer_make_camera_isometric", icon="CON_CAMERASOLVER"
         )
-        layout.operator("scene.disable_anti_aliasing", icon="MOD_SMOOTH")
+        layout.operator("scene.retromancer_disable_anti_aliasing", icon="MOD_SMOOTH")
         layout.separator()
         layout.prop(
             scene.retromancer,
             "auto_resize",
             text="Auto-resize Retromancer textures",
         )
+
+
+def draw_popup(
+    title: str = "Retromancer:",
+    text: str = "null",
+    icon: Literal["INFO", "WARNING", "ERROR"] = "INFO",
+) -> None:
+    """Wrapper for bpy.context.window_manager info/warning/error popups"""
+
+    def draw(self, context):
+        for line in text.splitlines():
+            self.layout.label(text=line)
+
+    bpy.context.window_manager.popup_menu(draw, title=title, icon=icon)

@@ -51,7 +51,6 @@ class MakeCameraIsometricOperator(Operator):
 
     def check_camera_active(self, context) -> bool:
         """Check if current active object is a camera"""
-        print(context.active_object)
         return (
             isinstance(context.active_object, Object)
             and hasattr(context.active_object, "type")
@@ -62,7 +61,7 @@ class MakeCameraIsometricOperator(Operator):
 class DisableAntiAliasingOperator(Operator):
     """Set various properties for currently active rendering engine that reduce anti-aliasing in renders"""
 
-    bl_idname = "scene.disable_anti_aliasing"
+    bl_idname = "scene.retromancer_disable_anti_aliasing"
     bl_label = "Disable anti-aliasing"
 
     def execute(self, context) -> Set[str]:
