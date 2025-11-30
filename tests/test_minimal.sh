@@ -6,7 +6,7 @@ rm -rf blender-*
 while IFS=: read -r major_ver range || [[ -n $major_ver ]]; do
     major_ver=${major_ver//$'\r'/}
 
-    echo "Downloading Blender $major_ver..."
+    echo "Downloading Blender $major_ver.0..."
     blender_url="https://download.blender.org/release/Blender$major_ver/blender-$major_ver.0-linux-x64.tar.xz"
     ( wget -qO- "$blender_url" | tar -xJf - ) &
 done < releases.txt

@@ -11,7 +11,7 @@ while IFS=: read -r major_ver range || [[ -n $major_ver ]]; do
     end=${range#*-}
 
     for minor_ver in $(seq "$start" "$end"); do
-        echo "Downloading Blender $major_ver..."
+        echo "Downloading Blender $major_ver.$minor_ver..."
         blender_url="https://download.blender.org/release/Blender$major_ver/blender-$major_ver.$minor_ver-linux-x64.tar.xz"
         wget -qO- $blender_url | tar -xJf -
 
