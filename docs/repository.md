@@ -23,6 +23,7 @@ retromancer/
 │  ├─ textures.py
 │  └─ ui.py
 ├─ docs/
+├─ tests/
 └─ README.md
 ```
 
@@ -36,6 +37,7 @@ retromancer/
     * [`palettes.py`](../addon/palettes.py) - color palette presets and utilities definitions 
     * [`textures.py`](../addon/textures.py) - Bayer texture generation module and render resolution state tracker
     * [`ui.py`](../addon/ui.py) - addon UI elements definitions (_Render Properties_ panel and _Add node_ menu)
+* [`tests/`](../tests/) - unit tests for checking version compatibility with [own README](../tests/README.md)
 
 ## Node architecture
 
