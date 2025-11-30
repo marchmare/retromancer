@@ -1,0 +1,17 @@
+name: Retromancer addon CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Run minimal tests
+        run: ./tests/test_minimal.sh
+        shell: bash
