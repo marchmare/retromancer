@@ -38,7 +38,8 @@ class CompositorNodeRetromancer4ToneDither(
         """palette_presets_enum_prop update callback"""
         if not context.property:
             return
-        preset = getattr(self, context.property[1].split(".")[-1])
+        prop = self.parse_datapath(context.property[1])
+        preset = getattr(self, prop)
         self._update_color_palette(preset)
 
     def _update_ramp(self, name: str, property: str) -> None:
@@ -50,9 +51,12 @@ class CompositorNodeRetromancer4ToneDither(
 
     def update_tone_ramps(self, context) -> None:
         """tone_ramp_x_prop update callback"""
+        if not context.property:
+            return
         for tone in _TONES:
-            self._update_ramp(f"cr_mask_{tone}", context.property[1].split(".")[-1])
-            self._update_ramp(f"cr_gradient_{tone}", context.property[1].split(".")[-1])
+            prop = self.parse_datapath(context.property[1])
+            self._update_ramp(f"cr_mask_{tone}", prop)
+            self._update_ramp(f"cr_gradient_{tone}", prop)
 
     threshold_enum_prop: EnumProperty(  # type: ignore
         items=threshold_enum_items, name="", update=update_texture

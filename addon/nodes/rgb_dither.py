@@ -28,7 +28,9 @@ class CompositorNodeRetromancer6BitRGBDither(
 
     def update_tone_ramps(self, context) -> None:
         """tone_ramp_x_prop update callback"""
-        prop = context.property[1].split(".")[-1]
+        if not context.property:
+            return
+        prop = self.parse_datapath(context.property[1])
         prop_val = getattr(self, prop)
         for c in _RGB:
             dither_node = self.node_tree.nodes.get(f"dither_{c}")
