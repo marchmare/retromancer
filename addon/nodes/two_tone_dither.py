@@ -5,7 +5,12 @@ from bpy.props import EnumProperty
 from ..textures import initialize_textures, threshold_enum_items
 from ..palettes import palette_2tone_enum_items, Color as c
 from ..node_utils import CustomNodeGroupBuilder
-from ..compatibilty import get_math_node_type
+from ..compatibilty import (
+    get_math_node_type,
+    get_mixrgb_node,
+    mixrgb_input_color,
+    mixrgb_output,
+)
 
 # defaults
 _PRESET = "2tone_bw"
@@ -26,7 +31,7 @@ class CompositorNodeRetromancer2ToneDither(
         """threshold_enum_prop update callback"""
 
         texture_node = self.node_tree.nodes.get("Texture")
-        texture_node.texture = bpy.data.textures.get(self.threshold_enum_prop)
+        texture_node.image = bpy.data.images.get(self.threshold_enum_prop)
 
     def _update_color_palette(self, preset: str) -> None:
         """Load color values from preset into color sockets."""
@@ -97,15 +102,18 @@ class CompositorNodeRetromancer2ToneDither(
         nodes.add("sep_color", type="CompositorNodeSeparateColor")
         nodes.add("greater_than", type=get_math_node_type())
         nodes.add("greater_than_alpha", type=get_math_node_type())
-        nodes.add("mix", type="CompositorNodeMixRGB")
+        nodes.add("mix", type=get_mixrgb_node())
         nodes.add("alpha", type="CompositorNodeSetAlpha")
-        nodes.add("texture", type="CompositorNodeTexture")
+        nodes.add("texture", type="CompositorNodeImage", name="Texture")
         nodes.add("brightness", type="CompositorNodeBrightContrast")
 
         nodes.sep_color.mode = "HSV"
-        nodes.texture.texture = bpy.data.textures.get(self.threshold_enum_prop)
+        nodes.texture.image = bpy.data.images.get(self.threshold_enum_prop)
         nodes.greater_than.operation = "GREATER_THAN"
         nodes.greater_than_alpha.operation = "GREATER_THAN"
+
+        if hasattr(self.nodes.mix, "data_type"):  # for compatibility with Blender 5.0
+            self.nodes.mix.data_type = "RGBA"
 
         # TODO: verify if it does help with anything, adjust value, add links
         # nodes.add("posterize", type="CompositorNodePosterize")
@@ -118,15 +126,19 @@ class CompositorNodeRetromancer2ToneDither(
         links.new(nodes.input.outputs["Brightness"], nodes.brightness.inputs[1])
         links.new(nodes.input.outputs["Contrast"], nodes.brightness.inputs[2])
         links.new(nodes.brightness.outputs["Image"], nodes.sep_color.inputs["Image"])
-        links.new(nodes.input.outputs["Color 1"], nodes.mix.inputs[1])
-        links.new(nodes.input.outputs["Color 2"], nodes.mix.inputs[2])
-        links.new(nodes.texture.outputs["Color"], nodes.greater_than.inputs[1])
-        links.new(nodes.texture.outputs["Color"], nodes.greater_than_alpha.inputs[1])
+        links.new(
+            nodes.input.outputs["Color 1"], nodes.mix.inputs[mixrgb_input_color(1)]
+        )
+        links.new(
+            nodes.input.outputs["Color 2"], nodes.mix.inputs[mixrgb_input_color(2)]
+        )
+        links.new(nodes.texture.outputs["Image"], nodes.greater_than.inputs[1])
+        links.new(nodes.texture.outputs["Image"], nodes.greater_than_alpha.inputs[1])
         links.new(nodes.sep_color.outputs[2], nodes.greater_than.inputs[0])
         links.new(nodes.sep_color.outputs[3], nodes.greater_than_alpha.inputs[0])
         links.new(nodes.greater_than.outputs["Value"], nodes.mix.inputs[0])
         links.new(
             nodes.greater_than_alpha.outputs["Value"], nodes.alpha.inputs["Alpha"]
         )
-        links.new(nodes.mix.outputs["Image"], nodes.alpha.inputs["Image"])
+        links.new(nodes.mix.outputs[mixrgb_output()], nodes.alpha.inputs["Image"])
         links.new(nodes.alpha.outputs["Image"], nodes.output.inputs["Image"])
