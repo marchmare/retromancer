@@ -11,6 +11,13 @@ def get_math_node_type() -> str:
     return "CompositorNodeMath"
 
 
+def get_colorramp_node() -> str:
+    """Get correct compositing Separate Color node type to use when adding nodes to node tree using Blender API."""
+    if BLENDER_VERSION >= (5, 0, 0):
+        return "ShaderNodeValToRGB"
+    return "CompositorNodeValToRGB"
+
+
 def get_mixrgb_node() -> str:
     """Get correct compositing Mix RGB (Color) node type to use when adding nodes to node tree using Blender API."""
     if BLENDER_VERSION >= (5, 0, 0):

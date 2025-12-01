@@ -4,6 +4,12 @@ from bpy.props import EnumProperty, FloatProperty
 from ..textures import initialize_textures, threshold_enum_items
 from ..palettes import palette_4tone_enum_items, Color as c
 from ..node_utils import CustomNodeGroupBuilder
+from ..compatibilty import (
+    get_mixrgb_node,
+    mixrgb_input_color,
+    mixrgb_output,
+    get_colorramp_node,
+)
 
 # defaults
 _TONES = ["hlt", "mid", "shd"]
@@ -153,17 +159,17 @@ class CompositorNodeRetromancer4ToneDither(
         for tone in _TONES:
             mask = nodes.add(
                 f"cr_mask_{tone}",
-                type="CompositorNodeValToRGB",
+                type=get_colorramp_node(),
                 name=f"cr_mask_{tone}",
             )
             gradient = nodes.add(
                 f"cr_gradient_{tone}",
-                type="CompositorNodeValToRGB",
+                type=get_colorramp_node(),
                 name=f"cr_gradient_{tone}",
             )
             multiply = nodes.add(
                 f"multiply_{tone}",
-                type="CompositorNodeMixRGB",
+                type=get_mixrgb_node(),
                 name=f"multiply_{tone}",
             )
             nodes.add(
@@ -178,7 +184,10 @@ class CompositorNodeRetromancer4ToneDither(
             gradient.color_ramp.interpolation = "EASE"
             [gradient.color_ramp.elements.new(0) for _ in range(2)]
 
+            if hasattr(multiply, "data_type"):  # for compatibility with Blender 5.0
+                multiply.data_type = "RGBA"
             multiply.blend_type = "MULTIPLY"
+            multiply.inputs[0].default_value = 1
 
         _cr_color_lookup = {
             nodes.cr_mask_hlt: (1, 1, 0, 0),
@@ -195,8 +204,12 @@ class CompositorNodeRetromancer4ToneDither(
                 node.color_ramp.elements[i].position = _CR_POS[i]
 
         for i in range(2):
-            nodes.add(f"add{i}", type="CompositorNodeMixRGB")
-            nodes.get(f"add{i}").blend_type = "ADD"
+            nodes.add(f"add{i}", type=get_mixrgb_node())
+            node = nodes.get(f"add{i}")
+            if hasattr(node, "data_type"):  # for compatibility with Blender 5.0
+                node.data_type = "RGBA"
+            node.blend_type = "ADD"
+            node.inputs[0].default_value = 1
 
         nodes.add("alpha", type="CompositorNodeSetAlpha")
         nodes.add(
@@ -225,15 +238,27 @@ class CompositorNodeRetromancer4ToneDither(
 
             links.new(nodes.brightness.outputs["Image"], cr_mask.inputs["Fac"])
             links.new(nodes.brightness.outputs["Image"], cr_gradient.inputs["Fac"])
-            links.new(cr_mask.outputs["Image"], multiply.inputs[1])
-            links.new(cr_gradient.outputs["Image"], dither.inputs["Image"])
-            links.new(dither.outputs["Image"], multiply.inputs[2])
+            links.new(cr_mask.outputs[0], multiply.inputs[mixrgb_input_color(1)])
+            links.new(cr_gradient.outputs[0], dither.inputs["Image"])
+            links.new(dither.outputs["Image"], multiply.inputs[mixrgb_input_color(2)])
 
-        links.new(nodes.multiply_mid.outputs[0], nodes.add0.inputs[1])
-        links.new(nodes.multiply_shd.outputs[0], nodes.add0.inputs[2])
-        links.new(nodes.multiply_hlt.outputs[0], nodes.add1.inputs[1])
-        links.new(nodes.add0.outputs[0], nodes.add1.inputs[2])
-        links.new(nodes.add1.outputs[0], nodes.alpha.inputs["Image"])
+        links.new(
+            nodes.multiply_mid.outputs[mixrgb_output()],
+            nodes.add0.inputs[mixrgb_input_color(1)],
+        )
+        links.new(
+            nodes.multiply_shd.outputs[mixrgb_output()],
+            nodes.add0.inputs[mixrgb_input_color(2)],
+        )
+        links.new(
+            nodes.multiply_hlt.outputs[mixrgb_output()],
+            nodes.add1.inputs[mixrgb_input_color(1)],
+        )
+        links.new(
+            nodes.add0.outputs[mixrgb_output()],
+            nodes.add1.inputs[mixrgb_input_color(2)],
+        )
+        links.new(nodes.add1.outputs[mixrgb_output()], nodes.alpha.inputs["Image"])
         links.new(nodes.brightness.outputs["Image"], nodes.sep_color.inputs["Image"])
         links.new(nodes.sep_color.outputs[3], nodes.posterize.inputs["Image"])
         links.new(nodes.posterize.outputs["Image"], nodes.dither_alpha.inputs["Image"])
