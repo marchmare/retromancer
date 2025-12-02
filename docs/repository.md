@@ -51,5 +51,10 @@ Whenever a node object is initialized, this utility class automatically handles 
 * `_configure_links()` – connects the internal nodes
 * `_configure_interface()` – sets default values or states of custom added `bpy.props` UI elements
 
-To support clean code and avoid repeated lookups through `node_tree.nodes`, `CustomNodeGroupBuilder` comes with internal `_Nodes` registry with named access to the created nodes.
+To support clean, maintainable code and avoid repeated lookups in `node_tree.nodes`, `CustomNodeGroupBuilder` provides an internal `_Nodes` registry.
+This registry stores created nodes under user-defined keys, allowing direct, named access without interacting with raw Blender node collections. It's`add()` method applies node `type` reference versioning. When a node is created, `add()` resolves the correct node identifier for the current Blender version along with any required properties.
+
+The builder also includes a `link()` method that simplifies connecting nodes.
+Instead of passing `bpy` node objects or manually resolving sockets, `link()` accepts node names and socket identifiers (names or indices). 
+This abstraction enables consistent behavior across Blender versions and error messages when a link fails.
 
