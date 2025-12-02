@@ -5,12 +5,6 @@ from bpy.props import EnumProperty
 from ..textures import initialize_textures, threshold_enum_items
 from ..palettes import palette_2tone_enum_items, Color as c
 from ..node_utils import CustomNodeGroupBuilder
-from ..compatibilty import (
-    get_math_node_type,
-    get_mixrgb_node,
-    mixrgb_input_color,
-    mixrgb_output,
-)
 
 # defaults
 _PRESET = "2tone_bw"
@@ -100,9 +94,9 @@ class CompositorNodeRetromancer2ToneDither(
     def _configure_nodes(self) -> None:
         nodes = self.nodes
         nodes.add("sep_color", type="CompositorNodeSeparateColor")
-        nodes.add("greater_than", type=get_math_node_type())
-        nodes.add("greater_than_alpha", type=get_math_node_type())
-        nodes.add("mix", type=get_mixrgb_node())
+        nodes.add("greater_than", type="CompositorNodeMath")
+        nodes.add("greater_than_alpha", type="CompositorNodeMath")
+        nodes.add("mix", type="CompositorNodeMixRGB")
         nodes.add("alpha", type="CompositorNodeSetAlpha")
         nodes.add("texture", type="CompositorNodeImage", name="Texture")
         nodes.add("brightness", type="CompositorNodeBrightContrast")
@@ -112,33 +106,22 @@ class CompositorNodeRetromancer2ToneDither(
         nodes.greater_than.operation = "GREATER_THAN"
         nodes.greater_than_alpha.operation = "GREATER_THAN"
 
-        if hasattr(self.nodes.mix, "data_type"):  # for compatibility with Blender 5.0
-            self.nodes.mix.data_type = "RGBA"
-
         # TODO: verify if it does help with anything, adjust value, add links
         # nodes.add("posterize", type="CompositorNodePosterize")
         # nodes.posterize.inputs["Steps"].default_value = 32
 
     def _configure_links(self) -> None:
-        nodes = self.nodes
-        links = self.node_tree.links
-        links.new(nodes.input.outputs["Image"], nodes.brightness.inputs["Image"])
-        links.new(nodes.input.outputs["Brightness"], nodes.brightness.inputs[1])
-        links.new(nodes.input.outputs["Contrast"], nodes.brightness.inputs[2])
-        links.new(nodes.brightness.outputs["Image"], nodes.sep_color.inputs["Image"])
-        links.new(
-            nodes.input.outputs["Color 1"], nodes.mix.inputs[mixrgb_input_color(1)]
-        )
-        links.new(
-            nodes.input.outputs["Color 2"], nodes.mix.inputs[mixrgb_input_color(2)]
-        )
-        links.new(nodes.texture.outputs["Image"], nodes.greater_than.inputs[1])
-        links.new(nodes.texture.outputs["Image"], nodes.greater_than_alpha.inputs[1])
-        links.new(nodes.sep_color.outputs[2], nodes.greater_than.inputs[0])
-        links.new(nodes.sep_color.outputs[3], nodes.greater_than_alpha.inputs[0])
-        links.new(nodes.greater_than.outputs["Value"], nodes.mix.inputs[0])
-        links.new(
-            nodes.greater_than_alpha.outputs["Value"], nodes.alpha.inputs["Alpha"]
-        )
-        links.new(nodes.mix.outputs[mixrgb_output()], nodes.alpha.inputs["Image"])
-        links.new(nodes.alpha.outputs["Image"], nodes.output.inputs["Image"])
+        self.link(output=("input", "Image"), input=("brightness", "Image"))
+        self.link(output=("input", "Brightness"), input=("brightness", 1))
+        self.link(output=("input", "Contrast"), input=("brightness", 2))
+        self.link(output=("brightness", "Image"), input=("sep_color", "Image"))
+        self.link(output=("input", "Color 1"), input=("mix", "Image"))
+        self.link(output=("input", "Color 2"), input=("mix", "Image_001"))
+        self.link(output=("texture", "Image"), input=("greater_than", 1))
+        self.link(output=("texture", "Image"), input=("greater_than_alpha", 1))
+        self.link(output=("sep_color", 2), input=("greater_than", 0))
+        self.link(output=("sep_color", 3), input=("greater_than_alpha", 0))
+        self.link(output=("greater_than", "Value"), input=("mix", "Fac"))
+        self.link(output=("greater_than_alpha", "Value"), input=("alpha", "Alpha"))
+        self.link(output=("mix", "Image"), input=("alpha", "Image"))
+        self.link(output=("alpha", "Image"), input=("output", "Image"))

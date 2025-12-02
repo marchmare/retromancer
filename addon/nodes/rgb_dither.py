@@ -116,19 +116,16 @@ class CompositorNodeRetromancer6BitRGBDither(
         nodes.posterize.inputs["Steps"].default_value = 32
 
     def _configure_links(self) -> None:
-        nodes = self.nodes
-        links = self.node_tree.links
+        self.link(output=("input", "Image"), input=("separate", "Image"))
+        self.link(output=("separate", "Red"), input=("dither_r", "Image"))
+        self.link(output=("separate", "Green"), input=("dither_g", "Image"))
+        self.link(output=("separate", "Blue"), input=("dither_b", "Image"))
+        self.link(output=("separate", "Alpha"), input=("posterize", "Image"))
+        self.link(output=("posterize", "Image"), input=("dither_a", "Image"))
 
-        links.new(nodes.input.outputs["Image"], nodes.separate.inputs["Image"])
-        links.new(nodes.separate.outputs["Red"], nodes.dither_r.inputs["Image"])
-        links.new(nodes.separate.outputs["Green"], nodes.dither_g.inputs["Image"])
-        links.new(nodes.separate.outputs["Blue"], nodes.dither_b.inputs["Image"])
-        links.new(nodes.separate.outputs["Alpha"], nodes.posterize.inputs["Image"])
-        links.new(nodes.posterize.outputs["Image"], nodes.dither_a.inputs["Image"])
-
-        links.new(nodes.dither_r.outputs["Image"], nodes.combine.inputs["Red"])
-        links.new(nodes.dither_g.outputs["Image"], nodes.combine.inputs["Green"])
-        links.new(nodes.dither_b.outputs["Image"], nodes.combine.inputs["Blue"])
-        links.new(nodes.dither_a.outputs["Image"], nodes.alpha.inputs["Alpha"])
-        links.new(nodes.combine.outputs["Image"], nodes.alpha.inputs["Image"])
-        links.new(nodes.alpha.outputs["Image"], nodes.output.inputs["Image"])
+        self.link(output=("dither_r", "Image"), input=("combine", "Red"))
+        self.link(output=("dither_g", "Image"), input=("combine", "Green"))
+        self.link(output=("dither_b", "Image"), input=("combine", "Blue"))
+        self.link(output=("dither_a", "Image"), input=("alpha", "Alpha"))
+        self.link(output=("combine", "Image"), input=("alpha", "Image"))
+        self.link(output=("alpha", "Image"), input=("output", "Image"))

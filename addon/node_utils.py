@@ -1,8 +1,9 @@
 import bpy
 import traceback
 from bpy.types import NodeTree, Node
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 from .ui import draw_popup
+from .compatibilty import resolve_node_version, resolve_socket_version
 
 
 class CustomNodeGroupBuilder:
@@ -52,6 +53,23 @@ class CustomNodeGroupBuilder:
         """
         return property.split(".")[-1]
 
+    def link(self, output: Tuple[str, str | int], input: Tuple[str, str | int]) -> None:
+        """
+        Link two nodes together via provided socket reference.
+        Sockets are checked for version compatibility and errors are raised if requested socket can't be found.
+        """
+        # output node
+        _node1 = self.nodes.get(output[0])
+        mapped_socket1 = resolve_socket_version(_node1, "output", output[1])
+        _socket1 = _get_socket(_node1.outputs, mapped_socket1)
+
+        # input node
+        _node2 = self.nodes.get(input[0])
+        mapped_socket2 = resolve_socket_version(_node2, "input", input[1])
+        _socket2 = _get_socket(_node2.inputs, mapped_socket2)
+
+        self.node_tree.links.new(_socket1, _socket2)
+
 
 class _Nodes:
     """Nodes collection for node setup and group classes"""
@@ -71,7 +89,38 @@ class _Nodes:
         return None
 
     def add(self, key: str, type: str, name: Optional[str] = None) -> Node:
-        self._nodes[key] = self._node_tree.nodes.new(type=type)
+        """
+        Add node to Compositor node tree.
+        Nodes are checked for version compatibility and version_compatibility_data dictionary is added as custom property to the node.
+        """
+        _versioned_node = resolve_node_version(type)
+        self._nodes[key] = self._node_tree.nodes.new(type=_versioned_node["alias"])
+        self._nodes[key]["version_compatibility_data"] = _versioned_node
+
+        if _values := _versioned_node.get("values", None):
+            for value in _values:
+                setattr(self._nodes[key], value, _values[value])
+
         if name:
             self._nodes[key].name = name
         return self._nodes[key]
+
+
+def _get_socket(
+    sockets: bpy.types.NodeSocketCollection, key: str | int
+) -> bpy.types.NodeSocket:
+    """Socket getter utility function. Handles displaying errors if nonexistent socket is requested."""
+    if isinstance(key, int):
+        try:
+            return sockets[key]
+        except IndexError:
+            draw_popup(text=traceback.format_exc(), icon="ERROR")
+            traceback.print_exc()
+    elif isinstance(key, str):
+        try:
+            return sockets[key]
+        except KeyError:
+            draw_popup(text=traceback.format_exc(), icon="ERROR")
+            traceback.print_exc()
+    else:
+        raise TypeError(f"Socket key must be int or str, not {type(key)}")

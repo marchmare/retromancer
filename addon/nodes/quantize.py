@@ -1,7 +1,6 @@
 from bpy.types import CompositorNodeCustomGroup
 
 from ..node_utils import CustomNodeGroupBuilder
-from ..compatibilty import get_math_node_type
 
 
 class CompositorNodeRetromancerQuantize(
@@ -43,20 +42,18 @@ class CompositorNodeRetromancerQuantize(
 
     def _configure_nodes(self) -> None:
         nodes = self.nodes
-        nodes.add("multiply", type=get_math_node_type())
-        nodes.add("floor", type=get_math_node_type())
-        nodes.add("divide", type=get_math_node_type())
+        nodes.add("multiply", type="CompositorNodeMath")
+        nodes.add("floor", type="CompositorNodeMath")
+        nodes.add("divide", type="CompositorNodeMath")
 
         nodes.multiply.operation = "MULTIPLY"
         nodes.floor.operation = "FLOOR"
         nodes.divide.operation = "DIVIDE"
 
     def _configure_links(self) -> None:
-        nodes = self.nodes
-        links = self.node_tree.links
-        links.new(nodes.input.outputs["Value"], nodes.multiply.inputs[0])
-        links.new(nodes.input.outputs["Fac"], nodes.multiply.inputs[1])
-        links.new(nodes.input.outputs["Fac"], nodes.divide.inputs[1])
-        links.new(nodes.multiply.outputs["Value"], nodes.floor.inputs["Value"])
-        links.new(nodes.floor.outputs["Value"], nodes.divide.inputs[0])
-        links.new(nodes.divide.outputs["Value"], nodes.output.inputs["Value"])
+        self.link(output=("input", "Value"), input=("multiply", 0))
+        self.link(output=("input", "Fac"), input=("multiply", 1))
+        self.link(output=("input", "Fac"), input=("divide", 1))
+        self.link(output=("multiply", "Value"), input=("floor", "Value"))
+        self.link(output=("floor", "Value"), input=("divide", 0))
+        self.link(output=("divide", "Value"), input=("output", "Value"))

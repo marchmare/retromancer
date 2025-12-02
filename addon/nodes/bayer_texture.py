@@ -52,6 +52,4 @@ class CompositorNodeRetromancerBayerTexture(
         nodes.texture.image = bpy.data.images.get(self.threshold_enum_prop)
 
     def _configure_links(self) -> None:
-        nodes = self.nodes
-        links = self.node_tree.links
-        links.new(nodes.texture.outputs["Image"], nodes.output.inputs["Image"])
+        self.link(output=("texture", "Image"), input=("output", "Image"))

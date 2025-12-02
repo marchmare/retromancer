@@ -103,19 +103,6 @@ def generate_tiled_pixel_data(
     return pixel_data
 
 
-def _initialize_texture(name: str) -> bpy.types.Texture:
-    """
-    Get Texture data-block of specified name.
-    Create new one if it doesn't exist.
-    """
-    T = bpy.data.textures
-    texture = T.get(f"{_DATANAME_PREF}{name}", None)
-    if not texture:
-        texture = T.new(f"{_DATANAME_PREF}{name}", type="IMAGE")
-    texture.use_fake_user = True
-    return texture
-
-
 def _initialize_image(name: str) -> bpy.types.Image:
     """
     Get Image data-block of specified name.
@@ -132,9 +119,7 @@ def _initialize_image(name: str) -> bpy.types.Image:
 def initialize_textures() -> None:
     """Prepare tied Image and Texture data-blocks for each Bayer matrix."""
     for treshmap in MAPS.keys():
-        image = _initialize_image(treshmap)
-        texture = _initialize_texture(treshmap)
-        texture.image = image
+        _initialize_image(treshmap)
 
 
 def check_textures_updated(scene) -> bool:
