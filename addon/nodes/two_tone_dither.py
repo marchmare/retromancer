@@ -5,7 +5,6 @@ from bpy.props import EnumProperty
 from ..textures import initialize_textures, threshold_enum_items
 from ..palettes import palette_2tone_enum_items, Color as c
 from ..node_utils import CustomNodeGroupBuilder
-from ..compatibilty import get_math_node_type
 
 # defaults
 _PRESET = "2tone_bw"
@@ -26,7 +25,7 @@ class CompositorNodeRetromancer2ToneDither(
         """threshold_enum_prop update callback"""
 
         texture_node = self.node_tree.nodes.get("Texture")
-        texture_node.texture = bpy.data.textures.get(self.threshold_enum_prop)
+        texture_node.image = bpy.data.images.get(self.threshold_enum_prop)
 
     def _update_color_palette(self, preset: str) -> None:
         """Load color values from preset into color sockets."""
@@ -95,15 +94,15 @@ class CompositorNodeRetromancer2ToneDither(
     def _configure_nodes(self) -> None:
         nodes = self.nodes
         nodes.add("sep_color", type="CompositorNodeSeparateColor")
-        nodes.add("greater_than", type=get_math_node_type())
-        nodes.add("greater_than_alpha", type=get_math_node_type())
+        nodes.add("greater_than", type="CompositorNodeMath")
+        nodes.add("greater_than_alpha", type="CompositorNodeMath")
         nodes.add("mix", type="CompositorNodeMixRGB")
         nodes.add("alpha", type="CompositorNodeSetAlpha")
-        nodes.add("texture", type="CompositorNodeTexture")
+        nodes.add("texture", type="CompositorNodeImage", name="Texture")
         nodes.add("brightness", type="CompositorNodeBrightContrast")
 
         nodes.sep_color.mode = "HSV"
-        nodes.texture.texture = bpy.data.textures.get(self.threshold_enum_prop)
+        nodes.texture.image = bpy.data.images.get(self.threshold_enum_prop)
         nodes.greater_than.operation = "GREATER_THAN"
         nodes.greater_than_alpha.operation = "GREATER_THAN"
 
@@ -112,21 +111,17 @@ class CompositorNodeRetromancer2ToneDither(
         # nodes.posterize.inputs["Steps"].default_value = 32
 
     def _configure_links(self) -> None:
-        nodes = self.nodes
-        links = self.node_tree.links
-        links.new(nodes.input.outputs["Image"], nodes.brightness.inputs["Image"])
-        links.new(nodes.input.outputs["Brightness"], nodes.brightness.inputs[1])
-        links.new(nodes.input.outputs["Contrast"], nodes.brightness.inputs[2])
-        links.new(nodes.brightness.outputs["Image"], nodes.sep_color.inputs["Image"])
-        links.new(nodes.input.outputs["Color 1"], nodes.mix.inputs[1])
-        links.new(nodes.input.outputs["Color 2"], nodes.mix.inputs[2])
-        links.new(nodes.texture.outputs["Color"], nodes.greater_than.inputs[1])
-        links.new(nodes.texture.outputs["Color"], nodes.greater_than_alpha.inputs[1])
-        links.new(nodes.sep_color.outputs[2], nodes.greater_than.inputs[0])
-        links.new(nodes.sep_color.outputs[3], nodes.greater_than_alpha.inputs[0])
-        links.new(nodes.greater_than.outputs["Value"], nodes.mix.inputs[0])
-        links.new(
-            nodes.greater_than_alpha.outputs["Value"], nodes.alpha.inputs["Alpha"]
-        )
-        links.new(nodes.mix.outputs["Image"], nodes.alpha.inputs["Image"])
-        links.new(nodes.alpha.outputs["Image"], nodes.output.inputs["Image"])
+        self.link(output=("input", "Image"), input=("brightness", "Image"))
+        self.link(output=("input", "Brightness"), input=("brightness", 1))
+        self.link(output=("input", "Contrast"), input=("brightness", 2))
+        self.link(output=("brightness", "Image"), input=("sep_color", "Image"))
+        self.link(output=("input", "Color 1"), input=("mix", "Image"))
+        self.link(output=("input", "Color 2"), input=("mix", "Image_001"))
+        self.link(output=("texture", "Image"), input=("greater_than", 1))
+        self.link(output=("texture", "Image"), input=("greater_than_alpha", 1))
+        self.link(output=("sep_color", 2), input=("greater_than", 0))
+        self.link(output=("sep_color", 3), input=("greater_than_alpha", 0))
+        self.link(output=("greater_than", "Value"), input=("mix", "Fac"))
+        self.link(output=("greater_than_alpha", "Value"), input=("alpha", "Alpha"))
+        self.link(output=("mix", "Image"), input=("alpha", "Image"))
+        self.link(output=("alpha", "Image"), input=("output", "Image"))

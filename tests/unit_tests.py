@@ -69,7 +69,11 @@ class TestNodes(unittest.TestCase):
             raise unittest.SkipTest("Addon not enabled - skipping node tests")
 
         bpy.context.scene.use_nodes = True
-        cls.node_tree = bpy.context.scene.node_tree
+        try:
+            cls.node_tree = bpy.context.scene.node_tree
+        except AttributeError:
+            bpy.ops.node.new_compositing_node_group(name="Compositor Nodes")
+            cls.node_tree = bpy.data.node_groups.get("Compositor Nodes")
 
     @classmethod
     def tearDownClass(cls):

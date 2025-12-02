@@ -179,6 +179,7 @@ class CompositorNodeRetromancer4ToneDither(
             [gradient.color_ramp.elements.new(0) for _ in range(2)]
 
             multiply.blend_type = "MULTIPLY"
+            multiply.inputs[0].default_value = 1
 
         _cr_color_lookup = {
             nodes.cr_mask_hlt: (1, 1, 0, 0),
@@ -196,7 +197,9 @@ class CompositorNodeRetromancer4ToneDither(
 
         for i in range(2):
             nodes.add(f"add{i}", type="CompositorNodeMixRGB")
-            nodes.get(f"add{i}").blend_type = "ADD"
+            node = nodes.get(f"add{i}")
+            node.blend_type = "ADD"
+            node.inputs[0].default_value = 1
 
         nodes.add("alpha", type="CompositorNodeSetAlpha")
         nodes.add(
@@ -210,39 +213,32 @@ class CompositorNodeRetromancer4ToneDither(
         nodes.posterize.inputs["Steps"].default_value = 32
 
     def _configure_links(self) -> None:
-        nodes = self.nodes
-        links = self.node_tree.links
-
-        links.new(nodes.input.outputs["Image"], nodes.brightness.inputs["Image"])
-        links.new(nodes.input.outputs["Brightness"], nodes.brightness.inputs[1])
-        links.new(nodes.input.outputs["Contrast"], nodes.brightness.inputs[2])
+        self.link(output=("input", "Image"), input=("brightness", "Image"))
+        self.link(output=("input", "Brightness"), input=("brightness", 1))
+        self.link(output=("input", "Contrast"), input=("brightness", 2))
 
         for tone in _TONES:
-            cr_mask = nodes.get(f"cr_mask_{tone}")
-            cr_gradient = nodes.get(f"cr_gradient_{tone}")
-            multiply = nodes.get(f"multiply_{tone}")
-            dither = nodes.get(f"dither_{tone}")
+            self.link(output=("brightness", "Image"), input=(f"cr_mask_{tone}", "Fac"))
+            self.link(output=("brightness", "Image"), input=(f"cr_gradient_{tone}", "Fac"))
+            self.link(output=(f"cr_mask_{tone}", 0), input=(f"multiply_{tone}", "Image"))
+            self.link(output=(f"cr_gradient_{tone}", 0), input=(f"dither_{tone}", "Image"))
+            self.link(output=(f"dither_{tone}", "Image"), input=(f"multiply_{tone}", "Image_001"))
 
-            links.new(nodes.brightness.outputs["Image"], cr_mask.inputs["Fac"])
-            links.new(nodes.brightness.outputs["Image"], cr_gradient.inputs["Fac"])
-            links.new(cr_mask.outputs["Image"], multiply.inputs[1])
-            links.new(cr_gradient.outputs["Image"], dither.inputs["Image"])
-            links.new(dither.outputs["Image"], multiply.inputs[2])
+        self.link(output=("multiply_mid", "Image"), input=("add0", "Image"))
+        self.link(output=("multiply_shd", "Image"), input=("add0", "Image_001"))
+        self.link(output=("multiply_hlt", "Image"), input=("add1", "Image"))
+        self.link(output=("add0", "Image"), input=("add1", "Image_001"))
 
-        links.new(nodes.multiply_mid.outputs[0], nodes.add0.inputs[1])
-        links.new(nodes.multiply_shd.outputs[0], nodes.add0.inputs[2])
-        links.new(nodes.multiply_hlt.outputs[0], nodes.add1.inputs[1])
-        links.new(nodes.add0.outputs[0], nodes.add1.inputs[2])
-        links.new(nodes.add1.outputs[0], nodes.alpha.inputs["Image"])
-        links.new(nodes.brightness.outputs["Image"], nodes.sep_color.inputs["Image"])
-        links.new(nodes.sep_color.outputs[3], nodes.posterize.inputs["Image"])
-        links.new(nodes.posterize.outputs["Image"], nodes.dither_alpha.inputs["Image"])
-        links.new(nodes.dither_alpha.outputs["Image"], nodes.alpha.inputs["Alpha"])
-        links.new(nodes.alpha.outputs["Image"], nodes.output.inputs["Image"])
+        self.link(output=("add1", "Image"), input=("alpha", "Image"))
+        self.link(output=("brightness", "Image"), input=("sep_color", "Image"))
+        self.link(output=("sep_color", 3), input=("posterize", "Image"))
+        self.link(output=("posterize", "Image"), input=("dither_alpha", "Image"))
+        self.link(output=("dither_alpha", "Image"), input=("alpha", "Alpha"))
+        self.link(output=("alpha", "Image"), input=("output", "Image"))
 
-        links.new(nodes.input.outputs["Color 1"], nodes.dither_shd.inputs["Color 2"])
-        links.new(nodes.input.outputs["Color 2"], nodes.dither_shd.inputs["Color 1"])
-        links.new(nodes.input.outputs["Color 2"], nodes.dither_mid.inputs["Color 2"])
-        links.new(nodes.input.outputs["Color 3"], nodes.dither_mid.inputs["Color 1"])
-        links.new(nodes.input.outputs["Color 3"], nodes.dither_hlt.inputs["Color 1"])
-        links.new(nodes.input.outputs["Color 4"], nodes.dither_hlt.inputs["Color 2"])
+        self.link(output=("input", "Color 1"), input=("dither_shd", "Color 2"))
+        self.link(output=("input", "Color 2"), input=("dither_shd", "Color 1"))
+        self.link(output=("input", "Color 2"), input=("dither_mid", "Color 2"))
+        self.link(output=("input", "Color 3"), input=("dither_mid", "Color 1"))
+        self.link(output=("input", "Color 3"), input=("dither_hlt", "Color 1"))
+        self.link(output=("input", "Color 4"), input=("dither_hlt", "Color 2"))

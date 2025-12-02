@@ -10,7 +10,7 @@
 Whether you're after Game Boy tones, gritty monochrome dithering, or some indexed 90s-like palettes, Retromancer provides you with the nodes that do the magic required!
 
 > [!NOTE]
->This addon is compatible with Blender 4.2.0 - 4.5.5, and works on Windows, Linux and macOS.
+>This addon is compatible with Blender 4.2.0 - 5.0, and works on Windows, Linux and macOS.
 
 > [!TIP]
 > If you're interested in more technical details about what's going on under the hood of Retromancer's custom nodes, check out [the documentation](docs/intro.md)! 

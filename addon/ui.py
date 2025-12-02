@@ -22,7 +22,6 @@ class NODE_MT_category_compositor_retromancer(Menu):
         node_add_menu.add_node_type(
             self.layout, "CompositorNodeRetromancer6BitRGBDither"
         )
-        node_add_menu.draw_assets_for_catalog(self.layout, self.bl_label)
 
 
 def update_add_menu(self, context) -> None:

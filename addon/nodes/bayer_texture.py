@@ -20,9 +20,8 @@ class CompositorNodeRetromancerBayerTexture(
 
     def update_texture(self, context) -> None:
         """threshold_enum_prop update callback"""
-
         texture_node = self.node_tree.nodes.get("Texture")
-        texture_node.texture = bpy.data.textures.get(self.threshold_enum_prop)
+        texture_node.image = bpy.data.images.get(self.threshold_enum_prop)
 
     threshold_enum_prop: EnumProperty(  # type: ignore
         items=threshold_enum_items, name="", update=update_texture
@@ -48,11 +47,9 @@ class CompositorNodeRetromancerBayerTexture(
 
     def _configure_nodes(self) -> None:
         nodes = self.nodes
-        nodes.add("texture", type="CompositorNodeTexture")
 
-        nodes.texture.texture = bpy.data.textures.get(self.threshold_enum_prop)
+        nodes.add("texture", type="CompositorNodeImage", name="Texture")
+        nodes.texture.image = bpy.data.images.get(self.threshold_enum_prop)
 
     def _configure_links(self) -> None:
-        nodes = self.nodes
-        links = self.node_tree.links
-        links.new(nodes.texture.outputs["Color"], nodes.output.inputs["Image"])
+        self.link(output=("texture", "Image"), input=("output", "Image"))
