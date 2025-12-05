@@ -13,15 +13,13 @@ class NODE_MT_category_compositor_retromancer(Menu):
 
     def draw(self, _context) -> None:
         node_add_menu.add_node_type(self.layout, "CompositorNodeRetromancerQuantize")
-        node_add_menu.add_node_type(
-            self.layout, "CompositorNodeRetromancerBayerTexture"
-        )
+        node_add_menu.add_node_type(self.layout, "CompositorNodeRetromancerBayerTexture")
         self.layout.separator()
         node_add_menu.add_node_type(self.layout, "CompositorNodeRetromancer2ToneDither")
         node_add_menu.add_node_type(self.layout, "CompositorNodeRetromancer4ToneDither")
-        node_add_menu.add_node_type(
-            self.layout, "CompositorNodeRetromancer6BitRGBDither"
-        )
+        node_add_menu.add_node_type(self.layout, "CompositorNodeRetromancer6BitRGBDither")
+        node_add_menu.add_node_type(self.layout, "CompositorNodeRetromancer6ToneDither")
+        node_add_menu.add_node_type(self.layout, "CompositorNodeRetromancer8BitRGBDither")
 
 
 def update_add_menu(self, context) -> None:
@@ -82,9 +80,7 @@ class UIRetromancerPanel(Panel):
         )
         layout.operator("scene.retromancer_apply_resolution")
         layout.separator()
-        layout.operator(
-            "scene.retromancer_make_camera_isometric", icon="CON_CAMERASOLVER"
-        )
+        layout.operator("scene.retromancer_make_camera_isometric", icon="CON_CAMERASOLVER")
         layout.operator("scene.retromancer_disable_anti_aliasing", icon="MOD_SMOOTH")
         layout.separator()
         layout.prop(

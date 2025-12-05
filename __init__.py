@@ -8,6 +8,8 @@ from .addon.nodes.two_tone_dither import CompositorNodeRetromancer2ToneDither
 from .addon.nodes.four_tone_dither import CompositorNodeRetromancer4ToneDither
 from .addon.nodes.bayer_texture import CompositorNodeRetromancerBayerTexture
 from .addon.nodes.rgb_dither import CompositorNodeRetromancer6BitRGBDither
+from .addon.nodes.six_tone_dither import CompositorNodeRetromancer6ToneDither
+from .addon.nodes.rgb_dither_8bit import CompositorNodeRetromancer8BitRGBDither
 from .addon.textures import regenerate_textures
 from .addon.ui import (
     NODE_MT_category_compositor_retromancer,
@@ -33,9 +35,7 @@ bl_info = {
 }
 
 
-def check_handler_appended(
-    handler: List[Tuple[Scene, Depsgraph]], func: Callable
-) -> bool:
+def check_handler_appended(handler: List[Tuple[Scene, Depsgraph]], func: Callable) -> bool:
     """Check if function wrapper is already added to specified app handler."""
     return handler.__name__ == func.__name__ and handler.__module__ == func.__module__
 
@@ -57,9 +57,7 @@ def remove_handler(handler_list: List[Tuple[Scene, Depsgraph]], func: Callable) 
 
 def check_menu_appended(menu: Menu, func: Callable) -> bool:
     """Check if function is already added to an existing menu."""
-    return func.__name__ in (
-        dyn_ui_func.__name__ for dyn_ui_func in menu._dyn_ui_initialize()
-    )
+    return func.__name__ in (dyn_ui_func.__name__ for dyn_ui_func in menu._dyn_ui_initialize())
 
 
 def add_menu(menu: Menu, func: Callable) -> None:
@@ -80,6 +78,8 @@ classes = [
     CompositorNodeRetromancer4ToneDither,
     CompositorNodeRetromancer6BitRGBDither,
     CompositorNodeRetromancerBayerTexture,
+    CompositorNodeRetromancer6ToneDither,
+    CompositorNodeRetromancer8BitRGBDither,
     NODE_MT_category_compositor_retromancer,
     RetromancerPropertyGroup,
     ApplyRetromancerResolutionOperator,

@@ -11,6 +11,15 @@ class ColorPalette(NamedTuple):
     colors: Tuple[int, ...]
 
 
+_6TONE_COLOR_PALETTES: List[ColorPalette] = [
+    ColorPalette(
+        "6tone_grayscale",
+        "Grayscale",
+        (0x000000, 0x333333, 0x666666, 0x999999, 0xCCCCCC, 0xFFFFFF),
+    ),
+]
+"""6 tone color palettes definitions as a ColorPalette named tuple."""
+
 _4TONE_COLOR_PALETTES: List[ColorPalette] = [
     ColorPalette(
         "4tone_grayscale",
@@ -262,10 +271,10 @@ _2TONE_COLOR_PALETTES = [
 
 def generate_palette_data(
     palette_list: List[ColorPalette],
-) -> Tuple[List[Tuple[float, float, float, float]], Dict[str, Tuple[int, ...]]]:
+) -> Tuple[List[Tuple[float, float, float, float, float, float]], Dict[str, Tuple[int, ...]]]:
     """Generate palette data to prepare EnumProperty item list and lookup dictionary out of list of ColorPalette items."""
 
-    enum_items: List[Tuple[float, float, float, float]] = []
+    enum_items: List[Tuple[float, float, float, float, float, float]] = []
     color_palette_dict: Dict[str, Tuple[int, ...]] = {}
     sorted_palettes = sorted(palette_list, key=lambda palette: palette.label)
     for idx, palette in enumerate(sorted_palettes):
@@ -276,7 +285,8 @@ def generate_palette_data(
 
 palette_2tone_enum_items, _2TONE_CP_DICT = generate_palette_data(_2TONE_COLOR_PALETTES)
 palette_4tone_enum_items, _4TONE_CP_DICT = generate_palette_data(_4TONE_COLOR_PALETTES)
-COLOR_PALETTES: Dict[str, Tuple[int, ...]] = _2TONE_CP_DICT | _4TONE_CP_DICT
+palette_6tone_enum_items, _6TONE_CP_DICT = generate_palette_data(_6TONE_COLOR_PALETTES)
+COLOR_PALETTES: Dict[str, Tuple[int, ...]] = _2TONE_CP_DICT | _4TONE_CP_DICT | _6TONE_CP_DICT
 
 
 class Color:
