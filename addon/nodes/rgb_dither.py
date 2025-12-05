@@ -36,41 +36,28 @@ class CompositorNodeRetromancer6BitRGBDither(
             dither_node = self.node_tree.nodes.get(f"dither_{c}")
             setattr(dither_node, prop, prop_val)
 
+    _TONE_RAMP_KWARGS = dict(
+        subtype="FACTOR",
+        update=update_tone_ramps,
+        min=0.0,
+        max=1.0,
+    )
+
     threshold_enum_prop: EnumProperty(  # type: ignore
         items=threshold_enum_items, name="", update=update_texture
     )
 
     tone_ramp_0_prop: FloatProperty(
-        subtype="FACTOR",
-        update=update_tone_ramps,
-        name="tone_pos_0",
-        min=0.0,
-        max=1.0,
-        default=_CR_POS[0],
+        name="tone_pos_0", default=_CR_POS[0], **_TONE_RAMP_KWARGS
     )  # type: ignore
     tone_ramp_1_prop: FloatProperty(
-        subtype="FACTOR",
-        update=update_tone_ramps,
-        name="tone_pos_1",
-        min=0.0,
-        max=1.0,
-        default=_CR_POS[1],
+        name="tone_pos_1", default=_CR_POS[1], **_TONE_RAMP_KWARGS
     )  # type: ignore
     tone_ramp_2_prop: FloatProperty(
-        subtype="FACTOR",
-        update=update_tone_ramps,
-        name="tone_pos_3",
-        min=0.0,
-        max=1.0,
-        default=_CR_POS[2],
+        name="tone_pos_3", default=_CR_POS[2], **_TONE_RAMP_KWARGS
     )  # type: ignore
     tone_ramp_3_prop: FloatProperty(
-        subtype="FACTOR",
-        update=update_tone_ramps,
-        name="tone_pos_3",
-        min=0.0,
-        max=1.0,
-        default=_CR_POS[3],
+        name="tone_pos_3", default=_CR_POS[3], **_TONE_RAMP_KWARGS
     )  # type: ignore
 
     def init(self, context) -> None:

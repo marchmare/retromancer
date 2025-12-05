@@ -58,45 +58,17 @@ class CompositorNodeRetromancer4ToneDither(
             self._update_ramp(f"cr_mask_{tone}", prop)
             self._update_ramp(f"cr_gradient_{tone}", prop)
 
-    threshold_enum_prop: EnumProperty(  # type: ignore
-        items=threshold_enum_items, name="", update=update_texture
-    )
+    threshold_enum_prop: EnumProperty(items=threshold_enum_items, name="", update=update_texture)  # type: ignore
+
     palette_presets_enum_prop: EnumProperty(  # type: ignore
         items=palette_4tone_enum_items, name="Preset", update=update_preset
     )
 
-    tone_ramp_0_prop: FloatProperty(
-        subtype="FACTOR",
-        update=update_tone_ramps,
-        name="tone_pos_0",
-        min=0.0,
-        max=1.0,
-        default=_CR_POS[0],
-    )  # type: ignore
-    tone_ramp_1_prop: FloatProperty(
-        subtype="FACTOR",
-        update=update_tone_ramps,
-        name="tone_pos_1",
-        min=0.0,
-        max=1.0,
-        default=_CR_POS[1],
-    )  # type: ignore
-    tone_ramp_2_prop: FloatProperty(
-        subtype="FACTOR",
-        update=update_tone_ramps,
-        name="tone_pos_3",
-        min=0.0,
-        max=1.0,
-        default=_CR_POS[2],
-    )  # type: ignore
-    tone_ramp_3_prop: FloatProperty(
-        subtype="FACTOR",
-        update=update_tone_ramps,
-        name="tone_pos_3",
-        min=0.0,
-        max=1.0,
-        default=_CR_POS[3],
-    )  # type: ignore
+    _TONE_RAMP_KWARGS = dict(subtype="FACTOR", update=update_tone_ramps, min=0.0, max=1.0)
+    tone_ramp_0_prop: FloatProperty(name="tone_pos_0", default=_CR_POS[0], **_TONE_RAMP_KWARGS)  # type: ignore
+    tone_ramp_1_prop: FloatProperty(name="tone_pos_1", default=_CR_POS[1], **_TONE_RAMP_KWARGS)  # type: ignore
+    tone_ramp_2_prop: FloatProperty(name="tone_pos_3", default=_CR_POS[2], **_TONE_RAMP_KWARGS)  # type: ignore
+    tone_ramp_3_prop: FloatProperty(name="tone_pos_3", default=_CR_POS[3], **_TONE_RAMP_KWARGS)  # type: ignore
 
     def init(self, context) -> None:
         initialize_textures()
@@ -119,58 +91,23 @@ class CompositorNodeRetromancer4ToneDither(
 
     def _configure_sockets(self) -> None:
         # INPUTS:
-        self.node_tree.interface.new_socket(
-            name="Image",
-            in_out="INPUT",
-            socket_type="NodeSocketColor",
-        )
+        self.node_tree.interface.new_socket(name="Image", in_out="INPUT", socket_type="NodeSocketColor")
         for i in range(1, 5):
-            self.node_tree.interface.new_socket(
-                name=f"Color {i}",
-                in_out="INPUT",
-                socket_type="NodeSocketColor",
-            )
-        self.node_tree.interface.new_socket(
-            name="Brightness",
-            in_out="INPUT",
-            socket_type="NodeSocketFloat",
-        )
-        self.node_tree.interface.new_socket(
-            name="Contrast",
-            in_out="INPUT",
-            socket_type="NodeSocketFloat",
-        )
+            self.node_tree.interface.new_socket(name=f"Color {i}", in_out="INPUT", socket_type="NodeSocketColor")
+        self.node_tree.interface.new_socket(name="Brightness", in_out="INPUT", socket_type="NodeSocketFloat")
+        self.node_tree.interface.new_socket(name="Contrast", in_out="INPUT", socket_type="NodeSocketFloat")
 
         # OUTPUTS:
-        self.node_tree.interface.new_socket(
-            name="Image",
-            in_out="OUTPUT",
-            socket_type="NodeSocketColor",
-        )
+        self.node_tree.interface.new_socket(name="Image", in_out="OUTPUT", socket_type="NodeSocketColor")
 
     def _configure_nodes(self) -> None:
         nodes = self.nodes
+
         for tone in _TONES:
-            mask = nodes.add(
-                f"cr_mask_{tone}",
-                type="CompositorNodeValToRGB",
-                name=f"cr_mask_{tone}",
-            )
-            gradient = nodes.add(
-                f"cr_gradient_{tone}",
-                type="CompositorNodeValToRGB",
-                name=f"cr_gradient_{tone}",
-            )
-            multiply = nodes.add(
-                f"multiply_{tone}",
-                type="CompositorNodeMixRGB",
-                name=f"multiply_{tone}",
-            )
-            nodes.add(
-                f"dither_{tone}",
-                type="CompositorNodeRetromancer2ToneDither",
-                name=f"dither_{tone}",
-            )
+            mask = nodes.add(f"cr_mask_{tone}", type="CompositorNodeValToRGB", name=f"cr_mask_{tone}")
+            gradient = nodes.add(f"cr_gradient_{tone}", type="CompositorNodeValToRGB", name=f"cr_gradient_{tone}")
+            multiply = nodes.add(f"multiply_{tone}", type="CompositorNodeMixRGB", name=f"multiply_{tone}")
+            nodes.add(f"dither_{tone}", type="CompositorNodeRetromancer2ToneDither", name=f"dither_{tone}")
 
             mask.color_ramp.interpolation = "CONSTANT"
             [mask.color_ramp.elements.new(0) for _ in range(2)]
@@ -202,14 +139,11 @@ class CompositorNodeRetromancer4ToneDither(
             node.inputs[0].default_value = 1
 
         nodes.add("alpha", type="CompositorNodeSetAlpha")
-        nodes.add(
-            "dither_alpha",
-            type="CompositorNodeRetromancer2ToneDither",
-            name="dither_alpha",
-        )
+        nodes.add("dither_alpha", type="CompositorNodeRetromancer2ToneDither", name="dither_alpha")
         nodes.add("sep_color", type="CompositorNodeSeparateColor")
         nodes.add("brightness", type="CompositorNodeBrightContrast")
         nodes.add("posterize", type="CompositorNodePosterize")
+
         nodes.posterize.inputs["Steps"].default_value = 32
 
     def _configure_links(self) -> None:
