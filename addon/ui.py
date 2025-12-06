@@ -17,8 +17,9 @@ class NODE_MT_category_compositor_retromancer(Menu):
         self.layout.separator()
         node_add_menu.add_node_type(self.layout, "CompositorNodeRetromancer2ToneDither")
         node_add_menu.add_node_type(self.layout, "CompositorNodeRetromancer4ToneDither")
-        node_add_menu.add_node_type(self.layout, "CompositorNodeRetromancer6BitRGBDither")
         node_add_menu.add_node_type(self.layout, "CompositorNodeRetromancer6ToneDither")
+        self.layout.separator()
+        node_add_menu.add_node_type(self.layout, "CompositorNodeRetromancer6BitRGBDither")
         node_add_menu.add_node_type(self.layout, "CompositorNodeRetromancer8BitRGBDither")
 
 

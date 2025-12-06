@@ -7,8 +7,8 @@ from .addon.nodes.quantize import CompositorNodeRetromancerQuantize
 from .addon.nodes.two_tone_dither import CompositorNodeRetromancer2ToneDither
 from .addon.nodes.four_tone_dither import CompositorNodeRetromancer4ToneDither
 from .addon.nodes.bayer_texture import CompositorNodeRetromancerBayerTexture
-from .addon.nodes.rgb_dither import CompositorNodeRetromancer6BitRGBDither
 from .addon.nodes.six_tone_dither import CompositorNodeRetromancer6ToneDither
+from .addon.nodes.rgb_dither_6bit import CompositorNodeRetromancer6BitRGBDither
 from .addon.nodes.rgb_dither_8bit import CompositorNodeRetromancer8BitRGBDither
 from .addon.textures import regenerate_textures
 from .addon.ui import (

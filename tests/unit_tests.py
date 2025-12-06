@@ -12,7 +12,9 @@ NODES = [
     "CompositorNodeRetromancerQuantize",
     "CompositorNodeRetromancer2ToneDither",
     "CompositorNodeRetromancer4ToneDither",
+    "CompositorNodeRetromancer6ToneDither",
     "CompositorNodeRetromancer6BitRGBDither",
+    "CompositorNodeRetromancer8BitRGBDither",
     "CompositorNodeRetromancerBayerTexture",
 ]
 
@@ -27,20 +29,14 @@ class TestRetromancer(unittest.TestCase):
 
     def test_addon_enabled(self) -> None:
         """Test if addon can be enabled"""
-        addon_utils.enable(
-            BL_ADDON, default_set=True, persistent=True, handle_error=None
-        )
+        addon_utils.enable(BL_ADDON, default_set=True, persistent=True, handle_error=None)
         self.assertTrue(addon_utils.check(BL_ADDON)[1], f"'{BL_ADDON}' was not enabled")
 
     def test_addon_disabled(self) -> None:
         """Test if addon can be disabled"""
-        addon_utils.enable(
-            BL_ADDON, default_set=True, persistent=True, handle_error=None
-        )
+        addon_utils.enable(BL_ADDON, default_set=True, persistent=True, handle_error=None)
         addon_utils.disable(BL_ADDON, default_set=True, handle_error=None)
-        self.assertFalse(
-            addon_utils.check(BL_ADDON)[1], f"'{BL_ADDON}' was not disabled"
-        )
+        self.assertFalse(addon_utils.check(BL_ADDON)[1], f"'{BL_ADDON}' was not disabled")
 
 
 def _get_node_by_id(node_tree: bpy.types.NodeTree, bl_id: str) -> bpy.types.Node:
@@ -62,9 +58,7 @@ class TestNodes(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        addon_utils.enable(
-            BL_ADDON, default_set=True, persistent=True, handle_error=None
-        )
+        addon_utils.enable(BL_ADDON, default_set=True, persistent=True, handle_error=None)
         if not addon_utils.check(BL_ADDON)[1]:
             raise unittest.SkipTest("Addon not enabled - skipping node tests")
 
@@ -133,9 +127,7 @@ class TestPropertiesPanel(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        addon_utils.enable(
-            "retromancer", default_set=True, persistent=True, handle_error=None
-        )
+        addon_utils.enable("retromancer", default_set=True, persistent=True, handle_error=None)
         if not addon_utils.check("retromancer")[1]:
             raise unittest.SkipTest("Addon not enabled - skipping node tests")
 
@@ -146,9 +138,7 @@ class TestPropertiesPanel(unittest.TestCase):
     def test_apply_resolution(self) -> None:
         """Test apply resolution operator"""
         TARGET_RESOLUTION = [64, 32]
-        bpy.context.scene.retromancer.selected_resolution = (
-            f"{TARGET_RESOLUTION[0]}x{TARGET_RESOLUTION[1]}"
-        )
+        bpy.context.scene.retromancer.selected_resolution = f"{TARGET_RESOLUTION[0]}x{TARGET_RESOLUTION[1]}"
         result = bpy.ops.scene.retromancer_apply_resolution()
         self.assertEqual(result, {"FINISHED"})
         self.assertEqual(
@@ -177,9 +167,7 @@ class TestPropertiesPanel(unittest.TestCase):
             self.assertEqual(result, {"CANCELLED"})
 
             bpy.context.view_layer.objects.active = _cube
-            with self.assertRaisesRegex(
-                RuntimeError, "Active object must be a camera."
-            ):
+            with self.assertRaisesRegex(RuntimeError, "Active object must be a camera."):
                 bpy.ops.scene.retromancer_make_camera_isometric()
 
     def test_disable_aa(self) -> None:

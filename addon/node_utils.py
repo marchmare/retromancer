@@ -13,9 +13,7 @@ class CustomNodeGroupBuilder:
         """Initialize group node with node tree and input and output sockets."""
 
         try:
-            self.node_tree = bpy.data.node_groups.new(
-                "." + self.bl_idname + "NodeTree", "CompositorNodeTree"
-            )
+            self.node_tree = bpy.data.node_groups.new("." + self.bl_idname + "NodeTree", "CompositorNodeTree")
             self.nodes = _Nodes(self.node_tree)
             self.nodes.add("input", "NodeGroupInput")
             self.nodes.add("output", "NodeGroupOutput")
@@ -60,11 +58,15 @@ class CustomNodeGroupBuilder:
         """
         # output node
         _node1 = self.nodes.get(output[0])
+        if not _node1:
+            raise AttributeError(f"'{output[0]}' node not found")
         mapped_socket1 = resolve_socket_version(_node1, "output", output[1])
         _socket1 = _get_socket(_node1.outputs, mapped_socket1)
 
         # input node
         _node2 = self.nodes.get(input[0])
+        if not _node2:
+            raise AttributeError(f"'{input[0]}' node not found")
         mapped_socket2 = resolve_socket_version(_node2, "input", input[1])
         _socket2 = _get_socket(_node2.inputs, mapped_socket2)
 
@@ -106,9 +108,7 @@ class _Nodes:
         return self._nodes[key]
 
 
-def _get_socket(
-    sockets: bpy.types.NodeSocketCollection, key: str | int
-) -> bpy.types.NodeSocket:
+def _get_socket(sockets: bpy.types.NodeSocketCollection, key: str | int) -> bpy.types.NodeSocket:
     """Socket getter utility function. Handles displaying errors if nonexistent socket is requested."""
     if isinstance(key, int):
         try:
