@@ -55,7 +55,7 @@ class _RGBDitherTemplate(
     def _configure_links(self) -> None:
         self.link(output=("input", "Image"), input=("separate", "Image"))
         for c in self._RGBA.items():
-            self.link(output=("separate", c[1]), input=(f"dither_{c[0]}", "Image"))
+            self.link(output=("separate", c[1]), input=("posterize" if c[0] == "a" else f"dither_{c[0]}", "Image"))
         self.link(output=("posterize", "Image"), input=("dither_a", "Image"))
 
         for c in self._RGBA.items():
